@@ -1,0 +1,41 @@
+{
+  "ok": true,
+  "result": {
+    "message_id": 1749,
+    "from": {
+      "id": 469460687,
+      "is_bot": true,
+      "first_name": "computerhok",
+      "username": "computerhokbot"
+    },
+    "chat": {
+      "id": 337345957,
+      "first_name": "Harry",
+      "last_name": "Metske",
+      "username": "SchmutzigerHarry",
+      "type": "private"
+    },
+    "date": 1598780455,
+    "reply_to_message": {
+      "message_id": 1748,
+      "from": {
+        "id": 337345957,
+        "is_bot": false,
+        "first_name": "Harry",
+        "last_name": "Metske",
+        "username": "SchmutzigerHarry",
+        "language_code": "nl"
+      },
+      "chat": {
+        "id": 337345957,
+        "first_name": "Harry",
+        "last_name": "Metske",
+        "username": "SchmutzigerHarry",
+        "type": "private"
+      },
+      "date": 1598780455,
+      "text": "private test message"
+    },
+    "text": "private test message"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 251123105,
+      "message": {
+        "message_id": 1797,
+        "from": {
+          "id": 337345957,
+          "is_bot": false,
+          "first_name": "Harry",
+          "last_name": "Metske",
+          "username": "SchmutzigerHarry",
+          "language_code": "nl"
+        },
+        "chat": {
+          "id": -235825137,
+          "title": "SchmutzHarGroup",
+          "type": "group",
+          "all_members_are_administrators": true
+        },
+        "date": 1598788679,
+        "new_chat_participant": {
+          "id": 469460687,
+          "is_bot": true,
+          "first_name": "computerhok",
+          "username": "computerhokbot"
+        },
+        "new_chat_member": {
+          "id": 469460687,
+          "is_bot": true,
+          "first_name": "computerhok",
+          "username": "computerhokbot"
+        },
+        "new_chat_members": [
+          {
+            "id": 469460687,
+            "is_bot": true,
+            "first_name": "computerhok",
+            "username": "computerhokbot"
+          }
+        ]
+      }
+    }
+  ]
+}
