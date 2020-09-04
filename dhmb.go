@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/metskem/dhmb/check"
 	"github.com/metskem/dhmb/conf"
 	"github.com/metskem/dhmb/db"
 	"log"
@@ -38,8 +39,7 @@ func main() {
 		log.Printf("bot.GetMe() failed: %v", err)
 	}
 
-	database := db.Initdb()
-	defer database.Close()
+	db.Initdb()
 
 	newUpdate := tgbotapi.NewUpdate(0)
 	newUpdate.Timeout = 60
@@ -60,6 +60,9 @@ func main() {
 				}
 			}
 		}()
+
+		// start the checks
+		check.CheckRunner()
 
 		// start listening for messages, and optionally respond
 		for update := range updatesChan {
