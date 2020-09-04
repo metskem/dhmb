@@ -53,7 +53,7 @@ func main() {
 				time.Sleep(time.Second * 1)
 				chatids := []int64{-235825137, 337345957} // TODO: for now fixed, but this should come from the chat table
 				for _, chatid := range chatids {
-					_, err := bot.Send(tgbotapi.NewMessage(chatid, fmt.Sprintf("%s started", meDetails)))
+					_, err := bot.Send(tgbotapi.NewMessage(chatid, fmt.Sprintf("%s started, buildtime: %s", meDetails, conf.BuildTime)))
 					if err != nil {
 						log.Printf("failed sending message to chat %d, error is %v", chatid, err)
 					}
