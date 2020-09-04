@@ -37,4 +37,5 @@ darwin:
 	GOOS=darwin GOARCH=amd64 go build -o ./target/darwin_amd64/${BINARY} ${LDFLAGS} .
 
 arm64:
-	GOOS=linux GOARCH=arm64 go build -o ./target/darwin_arm64/${BINARY} ${LDFLAGS} .
+	CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 go build -o ./target/darwin_arm64/${BINARY} ${LDFLAGS} .
+#  requires    brew install arm-linux-gnueabihf-binutils
