@@ -51,7 +51,7 @@ func main() {
 		go func() {
 			for i := 0; i < 1; i++ {
 				time.Sleep(time.Second * 1)
-				chatids := []int64{-235825137, 337345957}
+				chatids := []int64{-235825137, 337345957} // TODO: for now fixed, but this should come from the chat table
 				for _, chatid := range chatids {
 					_, err := bot.Send(tgbotapi.NewMessage(chatid, fmt.Sprintf("%s started", meDetails)))
 					if err != nil {
@@ -71,7 +71,10 @@ func main() {
 				if chat.IsPrivate() || (chat.IsGroup() && mentionedMe) {
 					log.Printf("[%s] [chat:%d] %s\n", update.Message.From.UserName, chat.ID, update.Message.Text)
 					if cmdMe {
-						_, err := bot.Send(tgbotapi.NewMessage(chat.ID, update.Message.Text))
+
+						// do the actual send Message
+						_, err := bot.Send(tgbotapi.NewMessage(chat.ID, fmt.Sprintf("Hi user %s, your name is %s %s", chat.UserName, chat.FirstName, chat.LastName)))
+
 						if err != nil {
 							log.Printf("failed sending message: %v", err)
 						}

@@ -37,5 +37,5 @@ darwin:
 	GOOS=darwin GOARCH=amd64 go build -o ./target/darwin_amd64/${BINARY} ${LDFLAGS} .
 
 arm64:
-	CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 go build -o ./target/darwin_arm64/${BINARY} ${LDFLAGS} .
-#  requires    brew install arm-linux-gnueabihf-binutils
+	GOOS=linux GOARCH=arm GOARM=7 go build -o ./target/darwin_arm64/${BINARY} ${LDFLAGS} .
+#   could not get this working on my Mac. So no cross-compile, for now I just compile it on my Raspberry PI
