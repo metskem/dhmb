@@ -73,7 +73,7 @@ func main() {
 					if cmdMe {
 
 						// do the actual send Message
-						_, err := bot.Send(tgbotapi.NewMessage(chat.ID, fmt.Sprintf("Hi user %s, your name is %s %s", chat.UserName, chat.FirstName, chat.LastName)))
+						_, err := bot.Send(tgbotapi.NewMessage(chat.ID, fmt.Sprintf("Hi user %s, your name is %s %s", update.Message.ReplyToMessage.Chat.UserName, update.Message.ReplyToMessage.Chat.FirstName, update.Message.ReplyToMessage.Chat.LastName)))
 
 						if err != nil {
 							log.Printf("failed sending message: %v", err)
