@@ -6,6 +6,7 @@ import (
 	"github.com/metskem/dhmb/conf"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 )
 
@@ -14,7 +15,11 @@ var Database *sql.DB
 func Initdb() {
 	var DbExists bool
 	var err error
-	if _, err = os.Stat(conf.DatabaseURL); err == nil {
+	dbURL, err := url.Parse(conf.DatabaseURL)
+	if err != nil {
+		log.Fatalf("failed parsing database url %s, error: %s", conf.DatabaseURL, err.Error())
+	}
+	if _, err = os.Stat(dbURL.Path); err == nil {
 		log.Printf("database already exists, opening it...\n")
 		DbExists = true
 	} else {

@@ -6,17 +6,23 @@ import (
 )
 
 type Monitor struct {
-	id          int
-	monname     string
-	montype     string
-	url         string
-	interval    int
-	expRespCode int
-	timeout     int
+	Id          int
+	MonName     string
+	MonType     string
+	MonStatus   string
+	Url         string
+	Interval    int
+	ExpRespCode int
+	Timeout     int
+	Retries     int
 }
 
+const MonTypeHttp = "http"
+const MonStatusActive = "active"
+const MonStatusInactive = "inactive"
+
 func (m Monitor) String() string {
-	return fmt.Sprintf("monname:%s type:%s", m.monname, m.montype)
+	return fmt.Sprintf("monname:%s type:%s", m.MonName, m.MonType)
 }
 
 func GetMonitors() []Monitor {
@@ -30,22 +36,26 @@ func GetMonitors() []Monitor {
 		var id int
 		var monname string
 		var montype string
+		var monstatus string
 		var url string
 		var intrvl int
 		var expRespCode int
 		var timeout int
-		err = rows.Scan(&id, &monname, &montype, &url, &intrvl, &expRespCode, &timeout)
+		var retries int
+		err = rows.Scan(&id, &monname, &montype, &monstatus, &url, &intrvl, &expRespCode, &timeout, &retries)
 		if err != nil {
 			log.Printf("error while scanning monitor table: %s", err)
 		}
 		result = append(result, Monitor{
-			id:          id,
-			monname:     monname,
-			montype:     montype,
-			url:         url,
-			interval:    intrvl,
-			expRespCode: expRespCode,
-			timeout:     timeout,
+			Id:          id,
+			MonName:     monname,
+			MonType:     montype,
+			MonStatus:   monstatus,
+			Url:         url,
+			Interval:    intrvl,
+			ExpRespCode: expRespCode,
+			Timeout:     timeout,
+			Retries:     retries,
 		})
 	}
 	return result

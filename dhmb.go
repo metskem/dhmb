@@ -21,22 +21,24 @@ func main() {
 		os.Exit(8)
 	}
 
-	bot, err := tgbotapi.NewBotAPI(token)
+	var err error
+
+	conf.Bot, err = tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err.Error())
 	}
 
 	if os.Getenv("debug") == "true" {
-		bot.Debug = true
+		conf.Bot.Debug = true
 	}
 
-	me, err = bot.GetMe()
+	me, err = conf.Bot.GetMe()
 	meDetails := "unknown"
 	if err == nil {
 		meDetails = fmt.Sprintf("BOT: ID:%d UserName:%s FirstName:%s LastName:%s", me.ID, me.UserName, me.FirstName, me.LastName)
-		log.Printf("Started bot: %s, version:%s, build time:%s, commit hash:%s", meDetails, conf.VersionTag, conf.BuildTime, conf.CommitHash)
+		log.Printf("Started Bot: %s, version:%s, build time:%s, commit hash:%s", meDetails, conf.VersionTag, conf.BuildTime, conf.CommitHash)
 	} else {
-		log.Printf("bot.GetMe() failed: %v", err)
+		log.Printf("Bot.GetMe() failed: %v", err)
 	}
 
 	db.Initdb()
@@ -44,25 +46,25 @@ func main() {
 	newUpdate := tgbotapi.NewUpdate(0)
 	newUpdate.Timeout = 60
 
-	updatesChan, err := bot.GetUpdatesChan(newUpdate)
+	updatesChan, err := conf.Bot.GetUpdatesChan(newUpdate)
 	if err == nil {
 
-		// announce that we are alive again
+		// announce that we are live again
 		go func() {
 			for i := 0; i < 1; i++ {
 				time.Sleep(time.Second * 1)
-				chatids := []int64{-235825137, 337345957} // TODO: for now fixed, but this should come from the chat table
-				for _, chatid := range chatids {
-					_, err := bot.Send(tgbotapi.NewMessage(chatid, fmt.Sprintf("%s started, buildtime: %s", meDetails, conf.BuildTime)))
+				chats := db.GetChats() // TODO: for now fixed, but this should come from the chat table
+				for _, chat := range chats {
+					_, err := conf.Bot.Send(tgbotapi.NewMessage(chat.ChatId, fmt.Sprintf("%s started, buildtime: %s", meDetails, conf.BuildTime)))
 					if err != nil {
-						log.Printf("failed sending message to chat %d, error is %v", chatid, err)
+						log.Printf("failed sending message to chat %d, error is %v", chat.ChatId, err)
 					}
 				}
 			}
 		}()
 
 		// start the checks
-		check.CheckRunner()
+		check.Runner()
 
 		// start listening for messages, and optionally respond
 		for update := range updatesChan {
@@ -76,7 +78,7 @@ func main() {
 					if cmdMe {
 
 						// do the actual send Message
-						_, err := bot.Send(tgbotapi.NewMessage(chat.ID, fmt.Sprintf("Hi user %s, your name is %s %s", update.Message.From.UserName, update.Message.From.FirstName, update.Message.From.LastName)))
+						_, err := conf.Bot.Send(tgbotapi.NewMessage(chat.ID, fmt.Sprintf("Hi user %s, your name is %s %s", update.Message.From.UserName, update.Message.From.FirstName, update.Message.From.LastName)))
 
 						if err != nil {
 							log.Printf("failed sending message: %v", err)
@@ -87,7 +89,7 @@ func main() {
 			fmt.Println("")
 		}
 	} else {
-		log.Printf("failed getting bot updatesChannel, error: %v", err)
+		log.Printf("failed getting Bot updatesChannel, error: %v", err)
 		os.Exit(8)
 	}
 }
