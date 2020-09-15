@@ -55,7 +55,7 @@ func main() {
 				time.Sleep(time.Second * 1)
 				chats := db.GetChats() // TODO: for now fixed, but this should come from the chat table
 				for _, chat := range chats {
-					_, err := conf.Bot.Send(tgbotapi.NewMessage(chat.ChatId, fmt.Sprintf("%s started, buildtime: %s", meDetails, conf.BuildTime)))
+					_, err := conf.Bot.Send(tgbotapi.NewMessage(chat.ChatId, fmt.Sprintf("%s started, buildtime: %s", me.UserName, conf.BuildTime)))
 					if err != nil {
 						log.Printf("failed sending message to chat %d, error is %v", chat.ChatId, err)
 					}

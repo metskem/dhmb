@@ -19,12 +19,11 @@ func Initdb() {
 	if err != nil {
 		log.Fatalf("failed parsing database url %s, error: %s", conf.DatabaseURL, err.Error())
 	}
-	if _, err = os.Stat(dbURL.Path); err == nil {
-		log.Printf("database already exists, opening it...\n")
-		DbExists = true
-	} else {
-		log.Printf("database does not yet exist, creating it...\n")
+	if _, err = os.Stat(dbURL.Opaque); err != nil && dbURL.Scheme == "file" {
+		log.Printf("database %s does not exist, creating it...\n")
 		DbExists = false
+	} else {
+		DbExists = true
 	}
 
 	Database, err = sql.Open("sqlite3", conf.DatabaseURL)
