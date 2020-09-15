@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 )
 
 var me tgbotapi.User
@@ -50,18 +49,13 @@ func main() {
 	if err == nil {
 
 		// announce that we are live again
-		go func() {
-			for i := 0; i < 1; i++ {
-				time.Sleep(time.Second * 1)
-				chats := db.GetChats() // TODO: for now fixed, but this should come from the chat table
-				for _, chat := range chats {
-					_, err := conf.Bot.Send(tgbotapi.NewMessage(chat.ChatId, fmt.Sprintf("%s started, buildtime: %s", me.UserName, conf.BuildTime)))
-					if err != nil {
-						log.Printf("failed sending message to chat %d, error is %v", chat.ChatId, err)
-					}
-				}
+		chats := db.GetChats()
+		for _, chat := range chats {
+			_, err := conf.Bot.Send(tgbotapi.NewMessage(chat.ChatId, fmt.Sprintf("%s has been restarted, buildtime: %s", me.UserName, conf.BuildTime)))
+			if err != nil {
+				log.Printf("failed sending message to chat %d, error is %v", chat.ChatId, err)
 			}
-		}()
+		}
 
 		// start the checks
 		check.Runner()
@@ -73,16 +67,41 @@ func main() {
 			} else {
 				chat := update.Message.Chat
 				mentionedMe, cmdMe := talkOrCmdToMe(update)
+
+				// check if someone is talking to me:
 				if chat.IsPrivate() || (chat.IsGroup() && mentionedMe) {
 					log.Printf("[%s] [chat:%d] %s\n", update.Message.From.UserName, chat.ID, update.Message.Text)
 					if cmdMe {
-
 						// do the actual send Message
 						_, err := conf.Bot.Send(tgbotapi.NewMessage(chat.ID, fmt.Sprintf("Hi user %s, your name is %s %s", update.Message.From.UserName, update.Message.From.FirstName, update.Message.From.LastName)))
-
 						if err != nil {
 							log.Printf("failed sending message: %v", err)
 						}
+					}
+				}
+
+				// check if someone started a new chat or added me to a group
+				if update.Message.NewChatMembers != nil && len(*update.Message.NewChatMembers) > 0 {
+					for _, user := range *update.Message.NewChatMembers {
+						if user.UserName == me.UserName {
+							name := chat.UserName
+							if chat.IsGroup() {
+								name = chat.Title
+							}
+							log.Printf("new chat added, chatid: %d, chat UserName: %s\n", chat.ID, name)
+						}
+					}
+				}
+
+				// check if someone deleted a chat or removed me from a group
+				if update.Message.LeftChatMember != nil {
+					leftChatMember := *update.Message.LeftChatMember
+					if leftChatMember.UserName == me.UserName {
+						name := chat.UserName
+						if chat.IsGroup() {
+							name = chat.Title
+						}
+						log.Printf("chat removed, chatid: %d, chat UserName: %s\n", chat.ID, name)
 					}
 				}
 			}
