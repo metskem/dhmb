@@ -19,6 +19,9 @@ func Loop(m db.Monitor) {
 		errorString := ""
 		if err == nil && resp != nil && resp.StatusCode == m.ExpRespCode {
 			log.Printf("%s:  OK, resp code: %d", m, resp.StatusCode)
+			if retries != 0 {
+				alert(true, m, statusCode, "")
+			}
 			retries = 0
 		} else {
 			if resp != nil {
@@ -31,16 +34,22 @@ func Loop(m db.Monitor) {
 			log.Printf("%s: NOK, resp code: %d, error getting URL %s: %s", m, statusCode, m.Url, errorString)
 			retries++
 			if retries == m.Retries {
-				alert(m, statusCode, errorString)
+				alert(false, m, statusCode, errorString)
 			}
 		}
 		time.Sleep(time.Duration(m.Interval) * time.Second)
 	}
 }
 
-func alert(m db.Monitor, statusCode int, errorString string) {
+func alert(statusUp bool, m db.Monitor, statusCode int, errorString string) {
 	for _, chat := range db.GetChats() {
-		_, err := conf.Bot.Send(tgbotapi.NewMessage(chat.ChatId, fmt.Sprintf("%s is down, statusCode: %d, error: %s", m.MonName, statusCode, errorString)))
+		var message string
+		if statusUp {
+			message = fmt.Sprintf("%s is UP: statusCode: %d", m.MonName, statusCode)
+		} else {
+			message = fmt.Sprintf("%s is DOWN: statusCode: %d, error: %s", m.MonName, statusCode, errorString)
+		}
+		_, err := conf.Bot.Send(tgbotapi.NewMessage(chat.ChatId, message))
 		if err != nil {
 			log.Printf("failed sending message to chat %d, error is %v", chat.ChatId, err)
 		}

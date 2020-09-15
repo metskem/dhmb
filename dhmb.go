@@ -88,7 +88,8 @@ func main() {
 							if chat.IsGroup() {
 								name = chat.Title
 							}
-							log.Printf("new chat added, chatid: %d, chat UserName: %s\n", chat.ID, name)
+							db.InsertChat(db.Chat{ChatId: chat.ID})
+							log.Printf("new chat added, chatid: %d, chat: %s\n", chat.ID, name)
 						}
 					}
 				}
@@ -101,7 +102,8 @@ func main() {
 						if chat.IsGroup() {
 							name = chat.Title
 						}
-						log.Printf("chat removed, chatid: %d, chat UserName: %s\n", chat.ID, name)
+						db.DeleteChat(chat.ID)
+						log.Printf("chat removed, chatid: %d, chat: %s\n", chat.ID, name)
 					}
 				}
 			}
