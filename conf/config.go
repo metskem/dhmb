@@ -1,7 +1,5 @@
 package conf
 
-import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-
 const DatabaseURL = "file:dhmb.db"
 const CreateTablesFile = "resources/sql/create-tables.sql"
 const InsertTestDataFile = "resources/sql/insert-testdata.sql"
@@ -12,5 +10,3 @@ var (
 	VersionTag string
 	BuildTime  string
 )
-
-var Bot *tgbotapi.BotAPI

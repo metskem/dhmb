@@ -6,6 +6,7 @@ import (
 	"github.com/metskem/dhmb/check"
 	"github.com/metskem/dhmb/conf"
 	"github.com/metskem/dhmb/db"
+	"github.com/metskem/dhmb/misc"
 	"log"
 	"os"
 	"strings"
@@ -22,16 +23,16 @@ func main() {
 
 	var err error
 
-	conf.Bot, err = tgbotapi.NewBotAPI(token)
+	misc.Bot, err = tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err.Error())
 	}
 
 	if os.Getenv("debug") == "true" {
-		conf.Bot.Debug = true
+		misc.Bot.Debug = true
 	}
 
-	me, err = conf.Bot.GetMe()
+	me, err = misc.Bot.GetMe()
 	meDetails := "unknown"
 	if err == nil {
 		meDetails = fmt.Sprintf("BOT: ID:%d UserName:%s FirstName:%s LastName:%s", me.ID, me.UserName, me.FirstName, me.LastName)
@@ -45,16 +46,13 @@ func main() {
 	newUpdate := tgbotapi.NewUpdate(0)
 	newUpdate.Timeout = 60
 
-	updatesChan, err := conf.Bot.GetUpdatesChan(newUpdate)
+	updatesChan, err := misc.Bot.GetUpdatesChan(newUpdate)
 	if err == nil {
 
 		// announce that we are live again
 		chats := db.GetChats()
 		for _, chat := range chats {
-			_, err := conf.Bot.Send(tgbotapi.NewMessage(chat.ChatId, fmt.Sprintf("%s has been restarted, buildtime: %s", me.UserName, conf.BuildTime)))
-			if err != nil {
-				log.Printf("failed sending message to chat %d, error is %v", chat.ChatId, err)
-			}
+			misc.SendMessage(chat, fmt.Sprintf("%s has been restarted, buildtime: %s", me.UserName, conf.BuildTime))
 		}
 
 		// start the checks
@@ -72,40 +70,35 @@ func main() {
 				if chat.IsPrivate() || (chat.IsGroup() && mentionedMe) {
 					log.Printf("[%s] [chat:%d] %s\n", update.Message.From.UserName, chat.ID, update.Message.Text)
 					if cmdMe {
-						// do the actual send Message
-						_, err := conf.Bot.Send(tgbotapi.NewMessage(chat.ID, fmt.Sprintf("Hi user %s, your name is %s %s", update.Message.From.UserName, update.Message.From.FirstName, update.Message.From.LastName)))
-						if err != nil {
-							log.Printf("failed sending message: %v", err)
-						}
+						misc.SendMessage(db.Chat{ChatId: chat.ID}, fmt.Sprintf("Hi %s (%s %s), you will receive alerts from now", update.Message.From.UserName, update.Message.From.FirstName, update.Message.From.LastName))
 					}
 				}
 
-				// check if someone started a new chat or added me to a group
+				// check if someone started a new chat
+				if chat.IsPrivate() && cmdMe && update.Message.Text == "/start" {
+					db.InsertChat(db.Chat{ChatId: chat.ID})
+					log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.UserName, chat.FirstName, chat.LastName)
+				}
+
+				// check if someone added me to a group
 				if update.Message.NewChatMembers != nil && len(*update.Message.NewChatMembers) > 0 {
 					for _, user := range *update.Message.NewChatMembers {
 						if user.UserName == me.UserName {
-							name := chat.UserName
-							if chat.IsGroup() {
-								name = chat.Title
-							}
 							db.InsertChat(db.Chat{ChatId: chat.ID})
-							log.Printf("new chat added, chatid: %d, chat: %s\n", chat.ID, name)
+							log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
 						}
 					}
 				}
 
-				// check if someone deleted a chat or removed me from a group
+				// check if someone removed me from a group
 				if update.Message.LeftChatMember != nil {
 					leftChatMember := *update.Message.LeftChatMember
 					if leftChatMember.UserName == me.UserName {
-						name := chat.UserName
-						if chat.IsGroup() {
-							name = chat.Title
-						}
 						db.DeleteChat(chat.ID)
-						log.Printf("chat removed, chatid: %d, chat: %s\n", chat.ID, name)
+						log.Printf("chat removed, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
 					}
 				}
+
 			}
 			fmt.Println("")
 		}
