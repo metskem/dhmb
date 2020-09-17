@@ -124,6 +124,9 @@ func talkOrCmdToMe(update tgbotapi.Update) (bool, bool) {
 			}
 			if entity.Type == "bot_command" {
 				botCmd = true
+				if strings.Contains(update.Message.Text, fmt.Sprintf("@%s", me.UserName)) {
+					mentioned = true
+				}
 			}
 		}
 	}
