@@ -6,6 +6,7 @@ import (
 	"github.com/metskem/dhmb/db"
 	"log"
 	"strings"
+	"time"
 )
 
 var Bot *tgbotapi.BotAPI
@@ -28,8 +29,11 @@ func HandleCommand(update tgbotapi.Update) {
 		SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, msg)
 	}
 	if strings.HasPrefix(update.Message.Text, "/status") {
-		msg := "status function not implemented yet"
-		log.Println(msg)
+		var msg string
+		for ix, mon := range db.GetMonitors() {
+			msg = fmt.Sprintf("%s%d - %s: %s since %s\n", msg, ix, mon.MonName, mon.LastStatus, mon.LastStatusChanged.Format(time.RFC3339))
+		}
+		log.Println("\n" + msg)
 		SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, msg)
 	}
 	if strings.HasPrefix(update.Message.Text, "/start") {
