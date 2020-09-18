@@ -18,6 +18,7 @@ func Loop(m db.Monitor) {
 		errorString := ""
 		if err == nil && resp != nil && resp.StatusCode == m.ExpRespCode {
 			log.Printf("%s: OK, statusCode: %d", m.MonName, resp.StatusCode)
+			updateLastStatus(m, true)
 			if retries >= m.Retries {
 				alert(true, m, statusCode, "")
 			}
@@ -31,12 +32,27 @@ func Loop(m db.Monitor) {
 				errorString = err.Error()
 			}
 			log.Printf("%s: NOK, attempt %d, statusCode: %d, error getting URL %s: %s", m.MonName, retries, statusCode, m.Url, errorString)
+			updateLastStatus(m, false)
 			retries++
 			if retries == m.Retries {
 				alert(false, m, statusCode, errorString)
 			}
 		}
 		time.Sleep(time.Duration(m.Interval) * time.Second)
+	}
+}
+
+func updateLastStatus(m db.Monitor, statusUp bool) {
+	monFromDB := db.GetMonitorByName(m.MonName)
+	if monFromDB.LastStatus != db.MonLastStatusUp && statusUp {
+		monFromDB.LastStatus = db.MonLastStatusUp
+		monFromDB.LastStatusChanged = time.Now()
+		db.UpdateMonitor(monFromDB)
+	}
+	if monFromDB.LastStatus != db.MonLastStatusDown && !statusUp {
+		monFromDB.LastStatus = db.MonLastStatusDown
+		monFromDB.LastStatusChanged = time.Now()
+		db.UpdateMonitor(monFromDB)
 	}
 }
 

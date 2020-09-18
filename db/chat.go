@@ -36,15 +36,27 @@ func GetChats() []Chat {
 	return result
 }
 
-func InsertChat(chat Chat) {
+/**
+  Insert a row into the chat table using the given chat. Returns the lastInsertId of the insert operation.
+*/
+func InsertChat(chat Chat) int64 {
 	insertSQL := "insert into chat(chatid) values(?)"
 	statement, err := Database.Prepare(insertSQL)
 	if err != nil {
 		log.Fatalf("failed to insert into chat, error: %s", err)
 	}
-	_, err = statement.Exec(chat.ChatId)
+	defer statement.Close()
+	result, err := statement.Exec(chat.ChatId)
 	if err != nil {
 		log.Printf("failed to insert chatid %d, error: %s", chat.ChatId, err)
+		return 0
+	} else {
+		lastInsertId, err := result.LastInsertId()
+		if err == nil {
+			return lastInsertId
+		} else {
+			return 0
+		}
 	}
 }
 
@@ -54,6 +66,7 @@ func DeleteChat(chatid int64) {
 	if err != nil {
 		log.Fatalf("failed to delete chat with chatid %d, error: %s", chatid, err)
 	}
+	defer statement.Close()
 	_, err = statement.Exec(chatid)
 	if err != nil {
 		log.Printf("failed to insert chatid %d, error: %s", chatid, err)

@@ -70,7 +70,7 @@ func main() {
 				if chat.IsPrivate() || (chat.IsGroup() && mentionedMe) {
 					log.Printf("[%s] [chat:%d] %s\n", update.Message.From.UserName, chat.ID, update.Message.Text)
 					if cmdMe {
-						misc.SendMessage(db.Chat{ChatId: chat.ID}, fmt.Sprintf("Hi %s (%s %s), you will receive alerts from now", update.Message.From.UserName, update.Message.From.FirstName, update.Message.From.LastName))
+						misc.HandleCommand(update)
 					}
 				}
 
