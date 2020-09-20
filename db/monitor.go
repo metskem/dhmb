@@ -31,8 +31,8 @@ func (m Monitor) String() string {
 	return fmt.Sprintf("monname:%s type:%s", m.MonName, m.MonType)
 }
 
-func GetMonitors() []Monitor {
-	rows, err := Database.Query("select * from monitor order by monname", nil)
+func GetActiveMonitors() []Monitor {
+	rows, err := Database.Query(fmt.Sprintf("select * from monitor where monstatus=\"%s\" order by monname", MonStatusActive), nil)
 	if err != nil {
 		log.Fatalf("failed to query table monitor, error: %s", err)
 	}

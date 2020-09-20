@@ -1,9 +1,8 @@
-package check
+package misc
 
 import (
 	"fmt"
 	"github.com/metskem/dhmb/db"
-	"github.com/metskem/dhmb/misc"
 	"log"
 	"net/http"
 	"time"
@@ -11,7 +10,7 @@ import (
 
 func Loop(m db.Monitor) {
 	retries := 0
-	for m.MonStatus == db.MonStatusActive {
+	for {
 		client := http.Client{Timeout: time.Duration(m.Timeout) * time.Second}
 		resp, err := client.Get(m.Url)
 		statusCode := 0
@@ -38,7 +37,9 @@ func Loop(m db.Monitor) {
 				alert(false, m, statusCode, errorString)
 			}
 		}
-		time.Sleep(time.Duration(m.Interval) * time.Second)
+		if RestartOrWait(m) {
+			return
+		}
 	}
 }
 
@@ -65,6 +66,6 @@ func alert(statusUp bool, m db.Monitor, statusCode int, errorString string) {
 	}
 	log.Println(message)
 	for _, chat := range db.GetChats() {
-		misc.SendMessage(chat, message)
+		SendMessage(chat, message)
 	}
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/metskem/dhmb/check"
 	"github.com/metskem/dhmb/conf"
 	"github.com/metskem/dhmb/db"
 	"github.com/metskem/dhmb/misc"
@@ -56,7 +55,7 @@ func main() {
 		}
 
 		// start the checks
-		check.Runner()
+		misc.Runner()
 
 		// start listening for messages, and optionally respond
 		for update := range updatesChan {
