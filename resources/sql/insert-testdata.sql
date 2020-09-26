@@ -8,3 +8,6 @@ insert into monitor(monname,montype,monstatus,url,intrvl) values("inactive-site"
 
 insert into chat(chatid) values(-235825137);
 insert into chat(chatid) values(337345957);
+
+insert into username(name,role) values("SchmutzigerHarry","admin");
+insert into username(name,role) values("AnnePup","reader");

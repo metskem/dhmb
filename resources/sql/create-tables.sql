@@ -10,7 +10,7 @@ create table monitor
     exp_resp_code     int              not null                                                   default 200,
     timeout           int              not null                                                   default 5,
     retries           int              not null                                                   default 2,
-    laststatus        char(32)         not null CHECK ( laststatus IN ('DOWN', 'UP', 'UNKNOWN') ) default 'UNKNOWN',
+    laststatus        char(32)         not null CHECK ( laststatus IN ('down', 'up', 'unknown') ) default 'unknown',
     laststatuschanged timestamp        not null                                                   default current_timestamp
 );
 
@@ -19,4 +19,12 @@ create table chat
 (
     id     integer    not null primary key,
     chatid int unique not null
+);
+
+drop table if exists username;
+create table username
+(
+    id   integer          not null primary key,
+    name char(128) unique not null,
+    role char(32)         not null CHECK ( role IN ('reader', 'admin') )
 );

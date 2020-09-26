@@ -69,35 +69,50 @@ func main() {
 				if chat.IsPrivate() || (chat.IsGroup() && mentionedMe) {
 					log.Printf("[%s] [chat:%d] %s\n", update.Message.From.UserName, chat.ID, update.Message.Text)
 					if cmdMe {
-						misc.HandleCommand(update)
+						if misc.IsAdmin(chat.UserName) {
+							misc.HandleCommand(update)
+						} else {
+							misc.SendMessage(db.Chat{ChatId: chat.ID}, fmt.Sprintf("sorry, %s is not allowed to send me commands", chat.UserName))
+						}
 					}
 				}
 
 				// check if someone started a new chat
 				if chat.IsPrivate() && cmdMe && update.Message.Text == "/start" {
-					db.InsertChat(db.Chat{ChatId: chat.ID})
-					log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.UserName, chat.FirstName, chat.LastName)
+					if misc.IsReader(chat.UserName) {
+						db.InsertChat(db.Chat{ChatId: chat.ID})
+						log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.UserName, chat.FirstName, chat.LastName)
+					} else {
+						misc.SendMessage(db.Chat{ChatId: chat.ID}, "sorry, you are not allowed to talk or listen to me")
+					}
 				}
 
 				// check if someone added me to a group
 				if update.Message.NewChatMembers != nil && len(*update.Message.NewChatMembers) > 0 {
-					for _, user := range *update.Message.NewChatMembers {
-						if user.UserName == me.UserName {
-							db.InsertChat(db.Chat{ChatId: chat.ID})
-							log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
+					if misc.IsReader(update.Message.From.UserName) {
+						for _, user := range *update.Message.NewChatMembers {
+							if user.UserName == me.UserName {
+								db.InsertChat(db.Chat{ChatId: chat.ID})
+								log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
+							}
 						}
+					} else {
+						misc.SendMessage(db.Chat{ChatId: chat.ID}, fmt.Sprintf("sorry, %s is not allowed to add me to a group", update.Message.From.UserName))
 					}
 				}
 
 				// check if someone removed me from a group
 				if update.Message.LeftChatMember != nil {
-					leftChatMember := *update.Message.LeftChatMember
-					if leftChatMember.UserName == me.UserName {
-						db.DeleteChat(chat.ID)
-						log.Printf("chat removed, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
+					if misc.IsReader(update.Message.From.UserName) {
+						leftChatMember := *update.Message.LeftChatMember
+						if leftChatMember.UserName == me.UserName {
+							db.DeleteChat(chat.ID)
+							log.Printf("chat removed, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
+						}
+					} else {
+						misc.SendMessage(db.Chat{ChatId: chat.ID}, fmt.Sprintf("sorry, %s is not allowed to remove me from a group", update.Message.From.UserName))
 					}
 				}
-
 			}
 			fmt.Println("")
 		}

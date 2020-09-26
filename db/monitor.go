@@ -22,10 +22,8 @@ type Monitor struct {
 
 const MonTypeHttp = "http"
 const MonStatusActive = "active"
-const MonStatusInactive = "inactive"
-const MonLastStatusUp = "UP"
-const MonLastStatusDown = "DOWN"
-const MonLastStatusUnknown = "UNKNOWN"
+const MonLastStatusUp = "up"
+const MonLastStatusDown = "down"
 
 func (m Monitor) String() string {
 	return fmt.Sprintf("monname:%s type:%s", m.MonName, m.MonType)

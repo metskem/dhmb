@@ -117,3 +117,11 @@ func Runner() {
 	}
 	log.Printf("we have %d running monitors", NumRunningMonitors)
 }
+
+func IsAdmin(userName string) bool {
+	return true
+}
+
+func IsReader(userName string) bool {
+	return true
+}
