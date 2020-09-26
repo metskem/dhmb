@@ -49,6 +49,24 @@ func HandleCommand(update tgbotapi.Update) {
 		SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, msg)
 	}
 
+	if strings.HasPrefix(update.Message.Text, "/members") {
+		var msg string
+		for ix, dhmbChat := range db.GetChats() {
+			chat, err := Bot.GetChat(tgbotapi.ChatConfig{ChatID: dhmbChat.ChatId})
+			if err == nil {
+				if chat.IsGroup() {
+					msg = fmt.Sprintf("%s%d - chat:%d,  group: %s (%s)\n", msg, ix, chat.ID, chat.Title, chat.Description)
+				} else {
+					msg = fmt.Sprintf("%s%d - chat: %d,  user : %s (%s %s)\n", msg, ix, chat.ID, chat.UserName, chat.FirstName, chat.LastName)
+				}
+			} else {
+				log.Printf("error getting chat %d: %v", dhmbChat.ChatId, err)
+			}
+		}
+		log.Println("\n" + msg)
+		SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, msg)
+	}
+
 	if strings.HasPrefix(update.Message.Text, "/start") {
 		SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, fmt.Sprintf("Hi %s (%s %s), you will receive alerts from now", update.Message.From.UserName, update.Message.From.FirstName, update.Message.From.LastName))
 	}
