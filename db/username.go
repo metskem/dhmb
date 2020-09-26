@@ -5,6 +5,9 @@ import (
 	"log"
 )
 
+const UserNameRoleAdmin = "admin"
+const UserNameRoleReader = "reader"
+
 type UserName struct {
 	Id   int
 	Name string

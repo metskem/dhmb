@@ -4,7 +4,8 @@ insert into monitor(monname,montype,monstatus,url,intrvl,exp_resp_code,timeout,r
 insert into monitor(monname,montype,monstatus,url,intrvl,exp_resp_code,timeout) values("computerhok-https","http","active","https://www.computerhok.nl",15,200,3);
 insert into monitor(monname,montype,url,intrvl,retries) values("google","http","https://www.google.com/notthere",20,5);
 insert into monitor(monname,montype,monstatus,url,intrvl) values("twitter","http","active","https://twitter.com/notthere",40);
-insert into monitor(monname,montype,monstatus,url,intrvl) values("inactive-site","http","inactive","https://www.google.com",30);
+insert into monitor(monname,montype,monstatus,url,intrvl) values("rabo-status","http","active","https://status.rabobank.nl/actuator/health",60);
+insert into monitor(monname,montype,monstatus,url,intrvl) values("computerhok-wiki","http","active","http://www.computerhok.nl/wiki/Wiki.jsp?page=Main",70);
 
 insert into chat(chatid) values(-235825137);
 insert into chat(chatid) values(337345957);

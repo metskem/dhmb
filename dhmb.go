@@ -66,20 +66,24 @@ func main() {
 				mentionedMe, cmdMe := talkOrCmdToMe(update)
 
 				// check if someone is talking to me:
-				if chat.IsPrivate() || (chat.IsGroup() && mentionedMe) {
+				if (chat.IsPrivate() || (chat.IsGroup() && mentionedMe)) && update.Message.Text != "/start" {
 					log.Printf("[%s] [chat:%d] %s\n", update.Message.From.UserName, chat.ID, update.Message.Text)
 					if cmdMe {
-						if misc.IsAdmin(chat.UserName) {
+						fromUser := update.Message.From.UserName
+						if chat.IsPrivate() {
+							fromUser = chat.UserName
+						}
+						if misc.HasRole(fromUser, db.UserNameRoleAdmin) {
 							misc.HandleCommand(update)
 						} else {
-							misc.SendMessage(db.Chat{ChatId: chat.ID}, fmt.Sprintf("sorry, %s is not allowed to send me commands", chat.UserName))
+							misc.SendMessage(db.Chat{ChatId: chat.ID}, fmt.Sprintf("sorry, %s is not allowed to send me commands", fromUser))
 						}
 					}
 				}
 
 				// check if someone started a new chat
 				if chat.IsPrivate() && cmdMe && update.Message.Text == "/start" {
-					if misc.IsReader(chat.UserName) {
+					if misc.HasRole(chat.UserName, db.UserNameRoleReader) || misc.HasRole(chat.UserName, db.UserNameRoleAdmin) {
 						db.InsertChat(db.Chat{ChatId: chat.ID})
 						log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.UserName, chat.FirstName, chat.LastName)
 					} else {
@@ -89,7 +93,7 @@ func main() {
 
 				// check if someone added me to a group
 				if update.Message.NewChatMembers != nil && len(*update.Message.NewChatMembers) > 0 {
-					if misc.IsReader(update.Message.From.UserName) {
+					if misc.HasRole(update.Message.From.UserName, db.UserNameRoleReader) {
 						for _, user := range *update.Message.NewChatMembers {
 							if user.UserName == me.UserName {
 								db.InsertChat(db.Chat{ChatId: chat.ID})
@@ -103,7 +107,7 @@ func main() {
 
 				// check if someone removed me from a group
 				if update.Message.LeftChatMember != nil {
-					if misc.IsReader(update.Message.From.UserName) {
+					if misc.HasRole(update.Message.From.UserName, db.UserNameRoleReader) {
 						leftChatMember := *update.Message.LeftChatMember
 						if leftChatMember.UserName == me.UserName {
 							db.DeleteChat(chat.ID)

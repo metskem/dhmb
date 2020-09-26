@@ -118,10 +118,12 @@ func Runner() {
 	log.Printf("we have %d running monitors", NumRunningMonitors)
 }
 
-func IsAdmin(userName string) bool {
-	return true
-}
-
-func IsReader(userName string) bool {
-	return true
+func HasRole(userName string, roleName string) bool {
+	for _, dbuser := range db.GetUserNames() {
+		if dbuser.Name == userName && dbuser.Role == roleName {
+			return true
+		}
+	}
+	log.Printf("%s permission denied for user %s", roleName, userName)
+	return false
 }
