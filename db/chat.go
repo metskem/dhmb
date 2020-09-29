@@ -69,6 +69,6 @@ func DeleteChat(chatid int64) {
 	defer statement.Close()
 	_, err = statement.Exec(chatid)
 	if err != nil {
-		log.Printf("failed to insert chatid %d, error: %s", chatid, err)
+		log.Printf("delete to insert chatid %d, error: %s", chatid, err)
 	}
 }

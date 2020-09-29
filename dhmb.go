@@ -84,8 +84,9 @@ func main() {
 				// check if someone started a new chat
 				if chat.IsPrivate() && cmdMe && update.Message.Text == "/start" {
 					if misc.HasRole(chat.UserName, db.UserNameRoleReader) || misc.HasRole(chat.UserName, db.UserNameRoleAdmin) {
-						db.InsertChat(db.Chat{ChatId: chat.ID})
-						log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.UserName, chat.FirstName, chat.LastName)
+						if db.InsertChat(db.Chat{ChatId: chat.ID}) != 0 {
+							log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.UserName, chat.FirstName, chat.LastName)
+						}
 					} else {
 						misc.SendMessage(db.Chat{ChatId: chat.ID}, "sorry, you are not allowed to talk or listen to me")
 					}
@@ -96,8 +97,9 @@ func main() {
 					if misc.HasRole(update.Message.From.UserName, db.UserNameRoleReader) {
 						for _, user := range *update.Message.NewChatMembers {
 							if user.UserName == me.UserName {
-								db.InsertChat(db.Chat{ChatId: chat.ID})
-								log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
+								if db.InsertChat(db.Chat{ChatId: chat.ID}) != 0 {
+									log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
+								}
 							}
 						}
 					} else {
