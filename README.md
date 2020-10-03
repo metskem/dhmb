@@ -11,12 +11,13 @@ Can monitor resources at specified intervals, and optionally send updates if a t
 
 ## Supported Bot Commands
 
-The following commands are supported (and should be configured with BotFather (Edit Commands) for convenience):
+The following commands are supported (and can/should be configured with BotFather (Edit Commands) for convenience):
 
 ```
 restart - restart the bot to pick up DB updates
 status - show the current status of all monitors
 members - show active chats (users and groups)
+debug on/off - dynamically turn Telegram Bot debugging on/off
 ``` 
 
 ## TODO
