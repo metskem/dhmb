@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+var Me tgbotapi.User
 var NumRunningMonitors int
 var RestartRequested = false
 var MonCountLock = sync.RWMutex{}
@@ -70,6 +71,20 @@ func HandleCommand(update tgbotapi.Update) {
 	if strings.HasPrefix(update.Message.Text, "/start") {
 		SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, fmt.Sprintf("Hi %s (%s %s), you will receive alerts from now", update.Message.From.UserName, update.Message.From.FirstName, update.Message.From.LastName))
 	}
+
+	if strings.HasPrefix(update.Message.Text, "/debug") {
+		if strings.Contains(update.Message.Text, " on") {
+			Bot.Debug = true
+			SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, "debug turned on")
+		} else {
+			if strings.Contains(update.Message.Text, " off") {
+				Bot.Debug = false
+				SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, "debug turned off")
+			} else {
+				SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, "please specify /debug on  or  /debug off")
+			}
+		}
+	}
 }
 
 /**
@@ -126,4 +141,33 @@ func HasRole(userName string, roleName string) bool {
 	}
 	log.Printf("%s permission denied for user %s", roleName, userName)
 	return false
+}
+
+/*
+  Returns if we are mentioned and if we were commanded
+*/
+func TalkOrCmdToMe(update tgbotapi.Update) (bool, bool) {
+	entities := update.Message.Entities
+	var mentioned = false
+	var botCmd = false
+	if entities != nil {
+		for _, entity := range *entities {
+			if entity.Type == "mention" {
+				if strings.HasPrefix(update.Message.Text, fmt.Sprintf("@%s", Me.UserName)) {
+					mentioned = true
+				}
+			}
+			if entity.Type == "bot_command" {
+				botCmd = true
+				if strings.Contains(update.Message.Text, fmt.Sprintf("@%s", Me.UserName)) {
+					mentioned = true
+				}
+			}
+		}
+	}
+	// if another bot was mentioned, the cmd is not for us
+	if update.Message.Chat.IsGroup() && mentioned == false {
+		botCmd = false
+	}
+	return mentioned, botCmd
 }

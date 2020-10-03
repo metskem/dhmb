@@ -8,10 +8,7 @@ import (
 	"github.com/metskem/dhmb/misc"
 	"log"
 	"os"
-	"strings"
 )
-
-var me tgbotapi.User
 
 func main() {
 	token := os.Getenv("bottoken")
@@ -31,10 +28,10 @@ func main() {
 		misc.Bot.Debug = true
 	}
 
-	me, err = misc.Bot.GetMe()
+	misc.Me, err = misc.Bot.GetMe()
 	meDetails := "unknown"
 	if err == nil {
-		meDetails = fmt.Sprintf("BOT: ID:%d UserName:%s FirstName:%s LastName:%s", me.ID, me.UserName, me.FirstName, me.LastName)
+		meDetails = fmt.Sprintf("BOT: ID:%d UserName:%s FirstName:%s LastName:%s", misc.Me.ID, misc.Me.UserName, misc.Me.FirstName, misc.Me.LastName)
 		log.Printf("Started Bot: %s, version:%s, build time:%s, commit hash:%s", meDetails, conf.VersionTag, conf.BuildTime, conf.CommitHash)
 	} else {
 		log.Printf("Bot.GetMe() failed: %v", err)
@@ -51,7 +48,7 @@ func main() {
 		// announce that we are live again
 		chats := db.GetChats()
 		for _, chat := range chats {
-			misc.SendMessage(chat, fmt.Sprintf("%s has been restarted, buildtime: %s", me.UserName, conf.BuildTime))
+			misc.SendMessage(chat, fmt.Sprintf("%s has been restarted, buildtime: %s", misc.Me.UserName, conf.BuildTime))
 		}
 
 		// start the checks
@@ -63,7 +60,7 @@ func main() {
 				log.Println("ignored null update")
 			} else {
 				chat := update.Message.Chat
-				mentionedMe, cmdMe := talkOrCmdToMe(update)
+				mentionedMe, cmdMe := misc.TalkOrCmdToMe(update)
 
 				// check if someone is talking to me:
 				if (chat.IsPrivate() || (chat.IsGroup() && mentionedMe)) && update.Message.Text != "/start" {
@@ -96,7 +93,7 @@ func main() {
 				if update.Message.NewChatMembers != nil && len(*update.Message.NewChatMembers) > 0 {
 					if misc.HasRole(update.Message.From.UserName, db.UserNameRoleReader) {
 						for _, user := range *update.Message.NewChatMembers {
-							if user.UserName == me.UserName {
+							if user.UserName == misc.Me.UserName {
 								if db.InsertChat(db.Chat{ChatId: chat.ID}) != 0 {
 									log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
 								}
@@ -111,7 +108,7 @@ func main() {
 				if update.Message.LeftChatMember != nil {
 					if misc.HasRole(update.Message.From.UserName, db.UserNameRoleReader) {
 						leftChatMember := *update.Message.LeftChatMember
-						if leftChatMember.UserName == me.UserName {
+						if leftChatMember.UserName == misc.Me.UserName {
 							db.DeleteChat(chat.ID)
 							log.Printf("chat removed, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
 						}
@@ -126,33 +123,4 @@ func main() {
 		log.Printf("failed getting Bot updatesChannel, error: %v", err)
 		os.Exit(8)
 	}
-}
-
-/*
-  Returns if we are mentioned and if we were commanded
-*/
-func talkOrCmdToMe(update tgbotapi.Update) (bool, bool) {
-	entities := update.Message.Entities
-	var mentioned = false
-	var botCmd = false
-	if entities != nil {
-		for _, entity := range *entities {
-			if entity.Type == "mention" {
-				if strings.HasPrefix(update.Message.Text, fmt.Sprintf("@%s", me.UserName)) {
-					mentioned = true
-				}
-			}
-			if entity.Type == "bot_command" {
-				botCmd = true
-				if strings.Contains(update.Message.Text, fmt.Sprintf("@%s", me.UserName)) {
-					mentioned = true
-				}
-			}
-		}
-	}
-	// if another bot was mentioned, the cmd is not for us
-	if update.Message.Chat.IsGroup() && mentioned == false {
-		botCmd = false
-	}
-	return mentioned, botCmd
 }
