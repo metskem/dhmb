@@ -62,6 +62,7 @@ func InsertUserName(userName UserName) int64 {
 			if err == nil {
 				return lastInsertId
 			} else {
+				log.Printf("no username row was inserted, err: %s", err)
 				return 0
 			}
 		}
@@ -69,19 +70,20 @@ func InsertUserName(userName UserName) int64 {
 }
 
 func DeleteUserName(name string) bool {
-	insertSQL := "delete from username where name=?"
-	statement, err := Database.Prepare(insertSQL)
+	deleteSQL := "delete from username where name=?"
+	statement, err := Database.Prepare(deleteSQL)
 	defer statement.Close()
 	if err != nil {
 		log.Printf("failed to prepare stmt for delete username with name %s, error: %s", name, err)
 		return false
 	} else {
-		_, err = statement.Exec(name)
+		result, err := statement.Exec(name)
 		if err != nil {
 			log.Printf("failed to delete username %s, error: %s", name, err)
 			return false
 		} else {
-			return true
+			rowsAffected, _ := result.RowsAffected()
+			return rowsAffected == 1
 		}
 	}
 }

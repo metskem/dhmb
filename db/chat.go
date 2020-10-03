@@ -56,7 +56,7 @@ func InsertChat(chat Chat) int64 {
 			if err == nil {
 				return lastInsertId
 			} else {
-				log.Printf("now chat row was inserted")
+				log.Printf("no chat row was inserted, err: %s", err)
 				return 0
 			}
 		}
@@ -64,19 +64,20 @@ func InsertChat(chat Chat) int64 {
 }
 
 func DeleteChat(chatid int64) bool {
-	insertSQL := "delete from chat where chatid=?"
-	statement, err := Database.Prepare(insertSQL)
+	deleteSQL := "delete from chat where chatid=?"
+	statement, err := Database.Prepare(deleteSQL)
 	defer statement.Close()
 	if err != nil {
 		log.Printf("failed to prepare stmt for delete chat with chatid %d, error: %s", chatid, err)
 		return false
 	} else {
-		_, err = statement.Exec(chatid)
+		result, err := statement.Exec(chatid)
 		if err != nil {
 			log.Printf("failed to delete chatid %d, error: %s", chatid, err)
 			return false
 		} else {
-			return true
+			rowsAffected, _ := result.RowsAffected()
+			return rowsAffected == 1
 		}
 	}
 }
