@@ -22,23 +22,26 @@ func SendMessage(chat db.Chat, message string) {
 	if err != nil {
 		log.Printf("failed sending message to chat %d, error is %v", chat.ChatId, err)
 		if err.Error() == "Forbidden: bot was blocked by the user" {
-			db.DeleteChat(chat.ChatId)
-			log.Printf("removed chatid %d from list", chat.ChatId)
+			if db.DeleteChat(chat.ChatId) {
+				log.Printf("deleted chatid %d from list", chat.ChatId)
+			} else {
+				log.Printf("not deleted chatid %d from list", chat.ChatId)
+			}
 		}
 	}
 }
 
 func HandleCommand(update tgbotapi.Update) {
-
+	chatter := db.Chat{ChatId: update.Message.Chat.ID}
 	if strings.HasPrefix(update.Message.Text, "/restart") {
-		msg := "restart function accepted, please wait..."
+		msg := "restart accepted, please wait..."
 		log.Println(msg)
-		SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, msg)
+		SendMessage(chatter, msg)
 		RestartRequested = true
 		Runner()
-		msg = "restart function completed"
+		msg = "restart completed"
 		log.Println(msg)
-		SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, msg)
+		SendMessage(chatter, msg)
 	}
 
 	if strings.HasPrefix(update.Message.Text, "/status") {
@@ -47,7 +50,7 @@ func HandleCommand(update tgbotapi.Update) {
 			msg = fmt.Sprintf("%s%d - %s: %s since %s\n", msg, ix, mon.MonName, mon.LastStatus, mon.LastStatusChanged.Format(time.RFC3339))
 		}
 		log.Println("\n" + msg)
-		SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, msg)
+		SendMessage(chatter, msg)
 	}
 
 	if strings.HasPrefix(update.Message.Text, "/members") {
@@ -65,26 +68,79 @@ func HandleCommand(update tgbotapi.Update) {
 			}
 		}
 		log.Println("\n" + msg)
-		SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, msg)
+		SendMessage(chatter, msg)
 	}
 
 	if strings.HasPrefix(update.Message.Text, "/start") {
-		SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, fmt.Sprintf("Hi %s (%s %s), you will receive alerts from now", update.Message.From.UserName, update.Message.From.FirstName, update.Message.From.LastName))
+		SendMessage(chatter, fmt.Sprintf("Hi %s (%s %s), you will receive alerts from now", update.Message.From.UserName, update.Message.From.FirstName, update.Message.From.LastName))
 	}
 
 	if strings.HasPrefix(update.Message.Text, "/debug") {
 		if strings.Contains(update.Message.Text, " on") {
 			Bot.Debug = true
-			SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, "debug turned on")
+			SendMessage(chatter, "debug turned on")
 		} else {
 			if strings.Contains(update.Message.Text, " off") {
 				Bot.Debug = false
-				SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, "debug turned off")
+				SendMessage(chatter, "debug turned off")
 			} else {
-				SendMessage(db.Chat{ChatId: update.Message.Chat.ID}, "please specify /debug on  or  /debug off")
+				SendMessage(chatter, "please specify /debug on  or  /debug off")
 			}
 		}
 	}
+
+	if strings.HasPrefix(update.Message.Text, "/usernames") {
+		var msg string
+		for ix, userName := range db.GetUserNames() {
+			msg = fmt.Sprintf("%s%d - %s  :  %s\n", msg, ix, userName.Name, userName.Role)
+		}
+		log.Println("\n" + msg)
+		SendMessage(chatter, msg)
+	}
+
+	if strings.HasPrefix(update.Message.Text, "/usernameadd") {
+		words := strings.Split(update.Message.Text, " ")
+		if len(words) == 3 && (words[2] == db.UserNameRoleAdmin || words[2] == db.UserNameRoleReader) {
+			if strings.HasSuffix(update.Message.Text, fmt.Sprintf(" %s", db.UserNameRoleReader)) {
+				if db.InsertUserName(db.UserName{Name: words[1], Role: db.UserNameRoleReader}) != 0 {
+					SendMessage(chatter, fmt.Sprintf("username %s with role %s added", words[1], words[2]))
+					log.Printf("username %s with role %s added", words[1], words[2])
+				} else {
+					SendMessage(chatter, fmt.Sprintf("username %s with role %s not added", words[1], words[2]))
+					log.Printf("username %s with role %s not added", words[1], words[2])
+				}
+				return
+			} else {
+				if strings.HasSuffix(update.Message.Text, fmt.Sprintf(" %s", db.UserNameRoleAdmin)) {
+					if db.InsertUserName(db.UserName{Name: words[1], Role: db.UserNameRoleAdmin}) != 0 {
+						SendMessage(chatter, fmt.Sprintf("username %s with role %s added", words[1], words[2]))
+						log.Printf("username %s with role %s added", words[1], words[2])
+					} else {
+						SendMessage(chatter, fmt.Sprintf("username %s with role %s not added", words[1], words[2]))
+						log.Printf("username %s with role %s not added", words[1], words[2])
+					}
+					return
+				}
+			}
+		}
+		SendMessage(chatter, "specify /usernameadd <username> [admin|reader]")
+	}
+
+	if strings.HasPrefix(update.Message.Text, "/usernamedelete") {
+		words := strings.Split(update.Message.Text, " ")
+		if len(words) == 2 {
+			if db.DeleteUserName(words[1]) {
+				SendMessage(chatter, fmt.Sprintf("username %s deleted", words[1]))
+				log.Printf("username %s deleted", words[1])
+			} else {
+				SendMessage(chatter, fmt.Sprintf("username %s not deleted", words[1]))
+				log.Printf("username %s not deleted", words[1])
+			}
+		} else {
+			SendMessage(chatter, "specify /usernamedelete <username>")
+		}
+	}
+
 }
 
 /**

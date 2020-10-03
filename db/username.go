@@ -41,3 +41,47 @@ func GetUserNames() []UserName {
 	}
 	return result
 }
+
+/**
+  Insert a row into the username table. Returns the lastInsertId of the insert operation.
+*/
+func InsertUserName(userName UserName) int64 {
+	insertSQL := "insert into username(name,role) values(?,?)"
+	statement, err := Database.Prepare(insertSQL)
+	defer statement.Close()
+	if err != nil {
+		log.Printf("failed to prepare stmt for insert into username, error: %s", err)
+		return 0
+	} else {
+		result, err := statement.Exec(userName.Name, userName.Role)
+		if err != nil {
+			log.Printf("failed to insert username %d, error: %s", userName.Name, err)
+			return 0
+		} else {
+			lastInsertId, err := result.LastInsertId()
+			if err == nil {
+				return lastInsertId
+			} else {
+				return 0
+			}
+		}
+	}
+}
+
+func DeleteUserName(name string) bool {
+	insertSQL := "delete from username where name=?"
+	statement, err := Database.Prepare(insertSQL)
+	defer statement.Close()
+	if err != nil {
+		log.Printf("failed to prepare stmt for delete username with name %s, error: %s", name, err)
+		return false
+	} else {
+		_, err = statement.Exec(name)
+		if err != nil {
+			log.Printf("failed to delete username %s, error: %s", name, err)
+			return false
+		} else {
+			return true
+		}
+	}
+}

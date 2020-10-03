@@ -109,8 +109,11 @@ func main() {
 					if misc.HasRole(update.Message.From.UserName, db.UserNameRoleReader) {
 						leftChatMember := *update.Message.LeftChatMember
 						if leftChatMember.UserName == misc.Me.UserName {
-							db.DeleteChat(chat.ID)
-							log.Printf("chat removed, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
+							if db.DeleteChat(chat.ID) {
+								log.Printf("chat deleted, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
+							} else {
+								log.Printf("chat not deleted, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
+							}
 						}
 					} else {
 						misc.SendMessage(db.Chat{ChatId: chat.ID}, fmt.Sprintf("sorry, %s is not allowed to remove me from a group", update.Message.From.UserName))
