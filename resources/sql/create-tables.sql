@@ -17,8 +17,9 @@ create table monitor
 drop table if exists chat;
 create table chat
 (
-    id     integer    not null primary key,
-    chatid int unique not null
+    id     integer          not null primary key,
+    chatid int unique       not null,
+    name   char(128) unique not null
 );
 
 drop table if exists username;

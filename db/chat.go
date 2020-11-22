@@ -8,10 +8,11 @@ import (
 type Chat struct {
 	Id     int
 	ChatId int64
+	Name   string
 }
 
 func (chat Chat) String() string {
-	return fmt.Sprintf("Id:%d chatid:%d", chat.Id, chat.ChatId)
+	return fmt.Sprintf("Id:%d chatid:%d Name:%s", chat.Id, chat.ChatId, chat.Name)
 }
 
 func GetChats() []Chat {
@@ -24,13 +25,15 @@ func GetChats() []Chat {
 	for rows.Next() {
 		var id int
 		var chatid int64
-		err = rows.Scan(&id, &chatid)
+		var name string
+		err = rows.Scan(&id, &chatid, &name)
 		if err != nil {
 			log.Printf("error while scanning chat table: %s", err)
 		}
 		result = append(result, Chat{
 			Id:     id,
 			ChatId: chatid,
+			Name:   name,
 		})
 	}
 	return result
@@ -40,16 +43,16 @@ func GetChats() []Chat {
   Insert a row into the chat table using the given chat. Returns the lastInsertId of the insert operation.
 */
 func InsertChat(chat Chat) int64 {
-	insertSQL := "insert into chat(chatid) values(?)"
+	insertSQL := "insert into chat(chatid, name) values(?,?)"
 	statement, err := Database.Prepare(insertSQL)
 	defer statement.Close()
 	if err != nil {
 		log.Printf("failed to prepare stmt for insert into chat, error: %s", err)
 		return 0
 	} else {
-		result, err := statement.Exec(chat.ChatId)
+		result, err := statement.Exec(chat.ChatId, chat.Name)
 		if err != nil {
-			log.Printf("failed to insert chatid %d, error: %s", chat.ChatId, err)
+			log.Printf("failed to insert chatid %d, name %s, error: %s", chat.ChatId, chat.Name, err)
 			return 0
 		} else {
 			lastInsertId, err := result.LastInsertId()

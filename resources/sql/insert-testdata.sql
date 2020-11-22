@@ -7,8 +7,8 @@ insert into monitor(monname,montype,monstatus,url,intrvl) values("twitter","http
 insert into monitor(monname,montype,monstatus,url,intrvl) values("rabo-status","http","active","https://status.rabobank.nl/actuator/health",60);
 insert into monitor(monname,montype,monstatus,url,intrvl) values("computerhok-wiki","http","active","http://www.computerhok.nl/wiki/Wiki.jsp?page=Main",70);
 
-insert into chat(chatid) values(-235825137);
-insert into chat(chatid) values(337345957);
+insert into chat(chatid, name) values(-235825137,"SchmutzigerHarry");
+insert into chat(chatid, name) values(337345957,"AnnePup");
 
 insert into username(name,role) values("SchmutzigerHarry","admin");
 insert into username(name,role) values("AnnePup","reader");

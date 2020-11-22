@@ -77,7 +77,7 @@ func main() {
 
 				// check if someone started a new chat
 				if chat.IsPrivate() && cmdMe && update.Message.Text == "/start" {
-					if db.InsertChat(db.Chat{ChatId: chat.ID}) != 0 {
+					if db.InsertChat(db.Chat{ChatId: chat.ID, Name: chat.UserName}) != 0 {
 						log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.UserName, chat.FirstName, chat.LastName)
 						misc.Broadcast(fmt.Sprintf("new member: chat: %s (%s %s)", chat.UserName, chat.FirstName, chat.LastName))
 					}
@@ -88,7 +88,7 @@ func main() {
 					if misc.HasRole(update.Message.From.UserName, db.UserNameRoleReader) {
 						for _, user := range *update.Message.NewChatMembers {
 							if user.UserName == misc.Me.UserName {
-								if db.InsertChat(db.Chat{ChatId: chat.ID}) != 0 {
+								if db.InsertChat(db.Chat{ChatId: chat.ID, Name: chat.UserName}) != 0 {
 									log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
 								}
 							}
