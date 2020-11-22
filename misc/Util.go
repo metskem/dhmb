@@ -21,7 +21,7 @@ func SendMessage(chat db.Chat, message string) {
 	_, err := Bot.Send(tgbotapi.NewMessage(chat.ChatId, message))
 	if err != nil {
 		log.Printf("failed sending message to chat %d, error is %v", chat.ChatId, err)
-		if err.Error() == "Forbidden: bot was blocked by the user" {
+		if err.Error() == "Forbidden: bot was blocked by the user" || err.Error() == "Forbidden: bot was kicked from the group chat" {
 			if db.DeleteChat(chat.ChatId) {
 				log.Printf("deleted chatid %d from list", chat.ChatId)
 				Broadcast(fmt.Sprintf("chat removed: (Id=%d)", chat.ChatId))
