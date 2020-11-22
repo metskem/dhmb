@@ -46,10 +46,7 @@ func main() {
 	if err == nil {
 
 		// announce that we are live again
-		chats := db.GetChats()
-		for _, chat := range chats {
-			misc.SendMessage(chat, fmt.Sprintf("%s has been restarted, buildtime: %s", misc.Me.UserName, conf.BuildTime))
-		}
+		misc.Broadcast(fmt.Sprintf("%s has been (re)started, buildtime: %s", misc.Me.UserName, conf.BuildTime))
 
 		// start the checks
 		misc.Runner()
@@ -80,12 +77,9 @@ func main() {
 
 				// check if someone started a new chat
 				if chat.IsPrivate() && cmdMe && update.Message.Text == "/start" {
-					if misc.HasRole(chat.UserName, db.UserNameRoleReader) || misc.HasRole(chat.UserName, db.UserNameRoleAdmin) {
-						if db.InsertChat(db.Chat{ChatId: chat.ID}) != 0 {
-							log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.UserName, chat.FirstName, chat.LastName)
-						}
-					} else {
-						misc.SendMessage(db.Chat{ChatId: chat.ID}, "sorry, you are not allowed to talk or listen to me")
+					if db.InsertChat(db.Chat{ChatId: chat.ID}) != 0 {
+						log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.UserName, chat.FirstName, chat.LastName)
+						misc.Broadcast(fmt.Sprintf("new member: chat: %s (%s %s)", chat.UserName, chat.FirstName, chat.LastName))
 					}
 				}
 
@@ -110,7 +104,8 @@ func main() {
 						leftChatMember := *update.Message.LeftChatMember
 						if leftChatMember.UserName == misc.Me.UserName {
 							if db.DeleteChat(chat.ID) {
-								log.Printf("chat deleted, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
+								log.Printf("chat removed, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
+								misc.Broadcast(fmt.Sprintf("chat removed: %s (%s %s)", chat.UserName, chat.FirstName, chat.LastName))
 							} else {
 								log.Printf("chat not deleted, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
 							}

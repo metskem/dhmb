@@ -24,6 +24,7 @@ func SendMessage(chat db.Chat, message string) {
 		if err.Error() == "Forbidden: bot was blocked by the user" {
 			if db.DeleteChat(chat.ChatId) {
 				log.Printf("deleted chatid %d from list", chat.ChatId)
+				Broadcast(fmt.Sprintf("chat removed: (Id=%d)", chat.ChatId))
 			} else {
 				log.Printf("not deleted chatid %d from list", chat.ChatId)
 			}
@@ -34,14 +35,13 @@ func SendMessage(chat db.Chat, message string) {
 func HandleCommand(update tgbotapi.Update) {
 	chatter := db.Chat{ChatId: update.Message.Chat.ID}
 	if strings.HasPrefix(update.Message.Text, "/restart") {
-		msg := "restart accepted, please wait..."
+		msg := fmt.Sprintf("restart requested by %s, please wait...", update.Message.From.UserName)
 		log.Println(msg)
 		SendMessage(chatter, msg)
 		RestartRequested = true
 		Runner()
-		msg = "restart completed"
-		log.Println(msg)
-		SendMessage(chatter, msg)
+		log.Println("restart completed")
+		Broadcast(fmt.Sprintf("restart done by %s", update.Message.From.UserName))
 	}
 
 	if strings.HasPrefix(update.Message.Text, "/status") {
@@ -226,4 +226,10 @@ func TalkOrCmdToMe(update tgbotapi.Update) (bool, bool) {
 		botCmd = false
 	}
 	return mentioned, botCmd
+}
+
+func Broadcast(message string) {
+	for _, chat := range db.GetChats() {
+		SendMessage(chat, message)
+	}
 }

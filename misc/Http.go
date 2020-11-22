@@ -65,7 +65,5 @@ func alert(statusUp bool, m db.Monitor, statusCode int, errorString string) {
 		message = fmt.Sprintf("%s is DOWN: statusCode: %d, error: %s", m.MonName, statusCode, errorString)
 	}
 	log.Println(message)
-	for _, chat := range db.GetChats() {
-		SendMessage(chat, message)
-	}
+	Broadcast(message)
 }
