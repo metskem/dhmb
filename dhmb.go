@@ -85,11 +85,12 @@ func main() {
 
 				// check if someone added me to a group
 				if update.Message.NewChatMembers != nil && len(*update.Message.NewChatMembers) > 0 {
-					if misc.HasRole(update.Message.From.UserName, db.UserNameRoleReader) {
+					if misc.HasRole(update.Message.From.UserName, db.UserNameRoleReader) || misc.HasRole(update.Message.From.UserName, db.UserNameRoleAdmin) {
 						for _, user := range *update.Message.NewChatMembers {
 							if user.UserName == misc.Me.UserName {
 								if db.InsertChat(db.Chat{ChatId: chat.ID, Name: chat.UserName}) != 0 {
 									log.Printf("new chat added, chatid: %d, chat: %s (%s %s)\n", chat.ID, chat.Title, chat.FirstName, chat.LastName)
+									misc.Broadcast(fmt.Sprintf("new member: group:%s", chat.Title))
 								}
 							}
 						}

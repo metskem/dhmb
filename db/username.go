@@ -87,17 +87,3 @@ func DeleteUserName(name string) bool {
 		}
 	}
 }
-
-func UserNameIsAdmin(userName string) bool {
-	rows, err := Database.Query(`select name from username where name=? and role=?`, userName, UserNameRoleAdmin)
-	if err != nil {
-		log.Printf("failed to query table username, error: %s", err)
-		return false
-	}
-	defer rows.Close()
-	usernameFound := false
-	for rows.Next() {
-		usernameFound = true
-	}
-	return usernameFound
-}

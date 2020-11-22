@@ -230,7 +230,7 @@ func TalkOrCmdToMe(update tgbotapi.Update) (bool, bool) {
 
 func Broadcast(message string) {
 	for _, chat := range db.GetChats() {
-		if db.UserNameIsAdmin(chat.Name) {
+		if HasRole(chat.Name, db.UserNameRoleAdmin) {
 			SendMessage(chat, message)
 		}
 	}
