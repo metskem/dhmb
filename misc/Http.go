@@ -12,12 +12,14 @@ func Loop(m db.Monitor) {
 	retries := 0
 	for {
 		client := http.Client{Timeout: time.Duration(m.Timeout) * time.Second}
+		startTime := time.Now()
 		resp, err := client.Get(m.Url)
+		elapsed := time.Since(startTime).Milliseconds()
 		statusCode := 0
 		errorString := ""
 		if err == nil && resp != nil && resp.StatusCode == m.ExpRespCode {
 			log.Printf("%s: OK, statusCode: %d", m.MonName, resp.StatusCode)
-			updateLastStatus(m, true)
+			updateLastStatus(m, true, elapsed)
 			if retries >= m.Retries {
 				alert(true, m, statusCode, "")
 			}
@@ -31,7 +33,7 @@ func Loop(m db.Monitor) {
 				errorString = err.Error()
 			}
 			log.Printf("%s: NOK, attempt %d, statusCode: %d, error getting URL %s: %s", m.MonName, retries, statusCode, m.Url, errorString)
-			updateLastStatus(m, false)
+			updateLastStatus(m, false, elapsed)
 			retries++
 			if retries == m.Retries {
 				alert(false, m, statusCode, errorString)
@@ -43,7 +45,7 @@ func Loop(m db.Monitor) {
 	}
 }
 
-func updateLastStatus(m db.Monitor, statusUp bool) {
+func updateLastStatus(m db.Monitor, statusUp bool, respTime int64) {
 	monFromDB := db.GetMonitorByName(m.MonName)
 	if monFromDB.LastStatus != db.MonLastStatusUp && statusUp {
 		monFromDB.LastStatus = db.MonLastStatusUp
@@ -55,6 +57,7 @@ func updateLastStatus(m db.Monitor, statusUp bool) {
 		monFromDB.LastStatusChanged = time.Now()
 		db.UpdateMonitor(monFromDB)
 	}
+	recordResponseTime(m, respTime)
 }
 
 func alert(statusUp bool, m db.Monitor, statusCode int, errorString string) {
@@ -66,4 +69,8 @@ func alert(statusUp bool, m db.Monitor, statusCode int, errorString string) {
 	}
 	log.Println(message)
 	Broadcast(message)
+}
+
+func recordResponseTime(m db.Monitor, respTime int64) {
+	db.InsertRespTime(db.RespTime{MonId: m.Id, Time: respTime})
 }

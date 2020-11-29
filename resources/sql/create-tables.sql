@@ -29,3 +29,11 @@ create table username
     name char(128) unique not null,
     role char(32)         not null CHECK ( role IN ('reader', 'admin') )
 );
+
+create table resptime
+(
+    id    integer not null primary key,
+    monid integer not null,
+    time  integer not null,
+    foreign key (monid) references monitor (id) on delete cascade
+)

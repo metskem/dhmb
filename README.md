@@ -25,6 +25,9 @@ usernamedelete - <username> - delete a username
 
 ## TODO
 
+* - provide  response ti,me graphs using https://github.com/go-echarts/go-echarts and
+       photoConfig := tgbotapi.NewDocumentUpload(chatter.ChatId, f.Name())
+     	_, err := Bot.Send(photoConfig)
 * v - monitor definition (data model)
 * v - put chat in a (bolt?) db
 * v - if update comes in with [new_chat_members](https://stackoverflow.com/questions/52271498/can-i-detect-my-bots-groups-with-telegram-bot-api): put it on a persistent list
