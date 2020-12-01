@@ -68,7 +68,9 @@ func alert(statusUp bool, m db.Monitor, statusCode int, errorString string) {
 		message = fmt.Sprintf("%s is DOWN: statusCode: %d, error: %s", m.MonName, statusCode, errorString)
 	}
 	log.Println(message)
-	Broadcast(message)
+	if m.MonStatus != db.MonStatusSilenced {
+		Broadcast(message)
+	}
 }
 
 func recordResponseTime(m db.Monitor, respTime int64) {

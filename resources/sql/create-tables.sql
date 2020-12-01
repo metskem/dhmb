@@ -4,14 +4,14 @@ create table monitor
     id                integer          not null primary key,
     monname           char(128) unique not null,
     montype           char(64)         not null CHECK ( montype IN ('http') ),
-    monstatus         char(64)         not null CHECK ( monstatus IN ('active', 'inactive') )     default 'active',
+    monstatus         char(64)         not null CHECK ( monstatus IN ('active', 'inactive', 'silenced') ) default 'active',
     url               char(1024)       not null,
-    intrvl            int              not null                                                   default 30,
-    exp_resp_code     int              not null                                                   default 200,
-    timeout           int              not null                                                   default 5,
-    retries           int              not null                                                   default 2,
-    laststatus        char(32)         not null CHECK ( laststatus IN ('down', 'up', 'unknown') ) default 'unknown',
-    laststatuschanged timestamp        not null                                                   default current_timestamp
+    intrvl            int              not null                                                           default 30,
+    exp_resp_code     int              not null                                                           default 200,
+    timeout           int              not null                                                           default 5,
+    retries           int              not null                                                           default 2,
+    laststatus        char(32)         not null CHECK ( laststatus IN ('down', 'up', 'unknown') )         default 'unknown',
+    laststatuschanged timestamp        not null                                                           default current_timestamp
 );
 
 drop table if exists chat;
@@ -37,3 +37,9 @@ create table resptime
     time  integer not null,
     foreign key (monid) references monitor (id) on delete cascade
 )
+
+--  to alter a table, you usually end up with:
+-- create table-new (with different columns)
+INSERT INTO Destination SELECT * FROM Source;
+drop table Source;
+alter table Destination rename to Source;

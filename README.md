@@ -21,6 +21,9 @@ debug - [on|off] - dynamically turn Telegram Bot debugging on/off
 restart - restart the bot to pick up DB updates
 usernameadd - <username> [reader|admin] - add a username
 usernamedelete - <username> - delete a username
+silence - <monname> - silence a monitor (keep monitoring, but no alerts)
+unsilence - <monname> - unsilence a monitor (revert the silence)
+
 ``` 
 
 ## TODO
@@ -28,6 +31,7 @@ usernamedelete - <username> - delete a username
 * - provide  response ti,me graphs using https://github.com/go-echarts/go-echarts and
        photoConfig := tgbotapi.NewDocumentUpload(chatter.ChatId, f.Name())
      	_, err := Bot.Send(photoConfig)
+* v - option to (un)silence a monitor
 * v - monitor definition (data model)
 * v - put chat in a (bolt?) db
 * v - if update comes in with [new_chat_members](https://stackoverflow.com/questions/52271498/can-i-detect-my-bots-groups-with-telegram-bot-api): put it on a persistent list

@@ -75,6 +75,30 @@ func HandleCommand(update tgbotapi.Update) {
 		SendMessage(chatter, fmt.Sprintf("Hi %s (%s %s), you will receive alerts from now", update.Message.From.UserName, update.Message.From.FirstName, update.Message.From.LastName))
 	}
 
+	if strings.HasPrefix(update.Message.Text, "/silence") {
+		words := strings.Split(update.Message.Text, " ")
+		if len(words) == 2 {
+			mon2silence := db.GetMonitorByName(words[1])
+			mon2silence.MonStatus = db.MonStatusSilenced
+			db.UpdateMonitor(mon2silence)
+			SendMessage(chatter, fmt.Sprintf("%s silenced", mon2silence.MonName))
+		} else {
+			SendMessage(chatter, "please specify /silence <monname>")
+		}
+	}
+
+	if strings.HasPrefix(update.Message.Text, "/unsilence") {
+		words := strings.Split(update.Message.Text, " ")
+		if len(words) == 2 {
+			mon2silence := db.GetMonitorByName(words[1])
+			mon2silence.MonStatus = db.MonStatusActive
+			db.UpdateMonitor(mon2silence)
+			SendMessage(chatter, fmt.Sprintf("%s unsilenced", mon2silence.MonName))
+		} else {
+			SendMessage(chatter, "please specify /unsilence <monname>")
+		}
+	}
+
 	if strings.HasPrefix(update.Message.Text, "/debug") {
 		if strings.Contains(update.Message.Text, " on") {
 			Bot.Debug = true

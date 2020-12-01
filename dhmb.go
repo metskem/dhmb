@@ -8,6 +8,7 @@ import (
 	"github.com/metskem/dhmb/misc"
 	"log"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -67,7 +68,8 @@ func main() {
 						if chat.IsPrivate() {
 							fromUser = chat.UserName
 						}
-						if misc.HasRole(fromUser, db.UserNameRoleAdmin) {
+						// /status can be done by anyone, for the other cmds you need admin role
+						if misc.HasRole(fromUser, db.UserNameRoleAdmin) || strings.HasPrefix(update.Message.Text, "/status") {
 							misc.HandleCommand(update)
 						} else {
 							misc.SendMessage(db.Chat{ChatId: chat.ID}, fmt.Sprintf("sorry, %s is not allowed to send me commands", fromUser))

@@ -22,6 +22,7 @@ type Monitor struct {
 
 const MonTypeHttp = "http"
 const MonStatusActive = "active"
+const MonStatusSilenced = "silenced"
 const MonLastStatusUp = "up"
 const MonLastStatusDown = "down"
 
