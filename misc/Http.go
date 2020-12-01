@@ -14,7 +14,7 @@ func Loop(m db.Monitor) {
 		client := http.Client{Timeout: time.Duration(m.Timeout) * time.Second}
 		startTime := time.Now()
 		resp, err := client.Get(m.Url)
-		elapsed := int64((time.Now().Nanosecond() - startTime.Nanosecond()) / 1000)
+		elapsed := int64(time.Since(startTime))
 		statusCode := 0
 		errorString := ""
 		if err == nil && resp != nil && resp.StatusCode == m.ExpRespCode {
