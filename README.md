@@ -23,17 +23,23 @@ usernameadd - <username> [reader|admin] - add a username
 usernamedelete - <username> - delete a username
 silence - <monname> - silence a monitor (keep monitoring, but no alerts)
 unsilence - <monname> - unsilence a monitor (revert the silence)
-
 ``` 
+
+## Configuration
+
+All configuration is done with environment variables. The following envvars are available:
+* **BOT_TOKEN** - the Telegram bot token, should be in the format <number>:<token>
+* **MAX_ROWS_RESPTIME** - The oldest rows in the resptime table are deleted each 10 minutes. This envvar defines how many rows remain per monitor. Default = 1000
+* **DEBUG** - true/false, whether the bot debug should be on or off. Default is false 
 
 ## TODO
 
-* - refactor the reading of envvars to a separate conf package
 * - make the row cleanup configurable with an envvar
-v - provide background thread that cleans up the resptime table, use maxnumresptimes as an envvar
 * - provide  response time graphs using https://github.com/go-echarts/go-echarts and
        photoConfig := tgbotapi.NewDocumentUpload(chatter.ChatId, f.Name())
      	_, err := Bot.Send(photoConfig)
+v - refactor the reading of envvars to a separate conf package
+v - provide background thread that cleans up the resptime table, use maxnumresptimes as an envvar
 * v - option to (un)silence a monitor
 * v - monitor definition (data model)
 * v - put chat in a (bolt?) db

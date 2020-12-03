@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"github.com/metskem/dhmb/conf"
 	"log"
 	"time"
 )
@@ -78,7 +79,7 @@ func CleanupOldStuffForMonitor(m Monitor) int64 {
 		log.Printf("failed to prepare stmt for delete from resptime, error: %s", err)
 		return 0
 	} else {
-		result, err := statement.Exec(m.MonName, m.MonName, 1000)
+		result, err := statement.Exec(m.MonName, m.MonName, conf.MaxRowsResptime)
 		if err != nil {
 			log.Printf("failed to delete rows from resptime for monitor %s, error: %s", m.MonName, err)
 			return 0

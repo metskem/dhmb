@@ -13,22 +13,15 @@ import (
 )
 
 func main() {
-	token := os.Getenv("bottoken")
-	if len(token) == 0 {
-		log.Print("missing envvar \"bottoken\"")
-		os.Exit(8)
-	}
 
 	var err error
 
-	misc.Bot, err = tgbotapi.NewBotAPI(token)
+	misc.Bot, err = tgbotapi.NewBotAPI(conf.BotToken)
 	if err != nil {
 		log.Panic(err.Error())
 	}
 
-	if os.Getenv("debug") == "true" {
-		misc.Bot.Debug = true
-	}
+	misc.Bot.Debug = conf.Debug
 
 	misc.Me, err = misc.Bot.GetMe()
 	meDetails := "unknown"
