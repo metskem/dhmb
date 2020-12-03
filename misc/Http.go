@@ -74,5 +74,5 @@ func alert(statusUp bool, m db.Monitor, statusCode int, errorString string) {
 }
 
 func recordResponseTime(m db.Monitor, respTime int64) {
-	db.InsertRespTime(db.RespTime{MonId: m.Id, Time: respTime})
+	db.InsertRespTime(db.RespTime{MonId: m.Id, Timestamp: time.Now(), Time: respTime / 1000000})
 }

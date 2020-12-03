@@ -219,7 +219,7 @@ func HasRole(userName string, roleName string) bool {
 			return true
 		}
 	}
-	log.Printf("%s permission denied for user %s", roleName, userName)
+	//log.Printf("%s permission denied for user %s", roleName, userName)
 	return false
 }
 

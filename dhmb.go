@@ -9,7 +9,10 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
+
+var RowCleanInterval = 600
 
 func main() {
 	token := os.Getenv("bottoken")
@@ -39,6 +42,16 @@ func main() {
 	}
 
 	db.Initdb()
+
+	// fire up a background thread that regularly deletes old rows from the resptime table
+	go func() {
+		for {
+			for _, mon := range db.GetActiveMonitors() {
+				db.CleanupOldStuffForMonitor(mon)
+			}
+			time.Sleep(time.Duration(1000000000 * RowCleanInterval))
+		}
+	}()
 
 	newUpdate := tgbotapi.NewUpdate(0)
 	newUpdate.Timeout = 60

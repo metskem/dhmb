@@ -28,7 +28,10 @@ unsilence - <monname> - unsilence a monitor (revert the silence)
 
 ## TODO
 
-* - provide  response ti,me graphs using https://github.com/go-echarts/go-echarts and
+* - refactor the reading of envvars to a separate conf package
+* - make the row cleanup configurable with an envvar
+v - provide background thread that cleans up the resptime table, use maxnumresptimes as an envvar
+* - provide  response time graphs using https://github.com/go-echarts/go-echarts and
        photoConfig := tgbotapi.NewDocumentUpload(chatter.ChatId, f.Name())
      	_, err := Bot.Send(photoConfig)
 * v - option to (un)silence a monitor

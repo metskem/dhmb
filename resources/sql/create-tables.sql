@@ -33,13 +33,17 @@ create table username
 create table resptime
 (
     id    integer not null primary key,
+    timestamp timestamp default current_timestamp,
     monid integer not null,
     time  integer not null,
     foreign key (monid) references monitor (id) on delete cascade
-)
+);
 
 --  to alter a table, you usually end up with:
 -- create table-new (with different columns)
 INSERT INTO Destination SELECT * FROM Source;
 drop table Source;
 alter table Destination rename to Source;
+
+-- add a column
+alter table resptime add column timestamp timestamp default current_timestamp;  -- does not work: Error: Cannot add a column with non-constant default
