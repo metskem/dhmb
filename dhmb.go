@@ -12,8 +12,6 @@ import (
 	"time"
 )
 
-var RowCleanInterval = 600
-
 func main() {
 	token := os.Getenv("bottoken")
 	if len(token) == 0 {
@@ -49,7 +47,7 @@ func main() {
 			for _, mon := range db.GetActiveMonitors() {
 				db.CleanupOldStuffForMonitor(mon)
 			}
-			time.Sleep(time.Duration(1000000000 * RowCleanInterval))
+			time.Sleep(time.Second * 600)
 		}
 	}()
 
