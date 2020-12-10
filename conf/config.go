@@ -23,7 +23,7 @@ var (
 	MaxRowsResptime    int
 )
 
-func EnvironmentComplete() bool {
+func EnvironmentComplete() {
 	envComplete := true
 
 	if len(BotToken) == 0 {
@@ -41,5 +41,7 @@ func EnvironmentComplete() bool {
 		MaxRowsResptime, _ = strconv.Atoi(MaxRowsResptimeStr)
 	}
 
-	return envComplete
+	if !envComplete {
+		log.Fatal("one or more envvars missing, aborting...")
+	}
 }

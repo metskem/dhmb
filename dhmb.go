@@ -14,6 +14,8 @@ import (
 
 func main() {
 
+	conf.EnvironmentComplete()
+
 	var err error
 
 	misc.Bot, err = tgbotapi.NewBotAPI(conf.BotToken)
