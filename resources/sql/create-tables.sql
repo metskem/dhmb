@@ -1,5 +1,5 @@
 drop table if exists monitor;
-create table monitor2
+create table monitor
 (
     id                integer          not null primary key,
     monname           char(128) unique not null,
@@ -44,13 +44,13 @@ create table resptime
 INSERT INTO monitor2 SELECT * FROM monitor;
 
 -- drop a table
-drop table Source;
+drop table monitor;
 
 -- show schema of a table
 .schema monitor
 
 -- rename a table
-alter table Destination rename to Source;
+alter table monitor2 rename to monitor;
 
 -- add a column
 alter table resptime
