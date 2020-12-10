@@ -1,5 +1,5 @@
 drop table if exists monitor;
-create table monitor
+create table monitor2
 (
     id                integer          not null primary key,
     monname           char(128) unique not null,
@@ -7,7 +7,7 @@ create table monitor
     monstatus         char(64)         not null CHECK ( monstatus IN ('active', 'inactive', 'silenced') ) default 'active',
     url               char(1024)       not null,
     intrvl            int              not null                                                           default 30,
-    exp_resp_code     int              not null                                                           default 200,
+    exp_resp_code     char(3)          not null                                                           default '200',
     timeout           int              not null                                                           default 5,
     retries           int              not null                                                           default 2,
     laststatus        char(32)         not null CHECK ( laststatus IN ('down', 'up', 'unknown') )         default 'unknown',
@@ -32,18 +32,26 @@ create table username
 
 create table resptime
 (
-    id    integer not null primary key,
+    id        integer not null primary key,
     timestamp timestamp default current_timestamp,
-    monid integer not null,
-    time  integer not null,
+    monid     integer not null,
+    time      integer not null,
     foreign key (monid) references monitor (id) on delete cascade
 );
 
 --  to alter a table, you usually end up with:
 -- create table-new (with different columns)
-INSERT INTO Destination SELECT * FROM Source;
+INSERT INTO monitor2 SELECT * FROM monitor;
+
+-- drop a table
 drop table Source;
+
+-- show schema of a table
+.schema monitor
+
+-- rename a table
 alter table Destination rename to Source;
 
 -- add a column
-alter table resptime add column timestamp timestamp default current_timestamp;  -- does not work: Error: Cannot add a column with non-constant default
+alter table resptime
+    add column timestamp timestamp default current_timestamp; -- does not work: Error: Cannot add a column with non-constant default

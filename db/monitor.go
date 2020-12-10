@@ -13,7 +13,7 @@ type Monitor struct {
 	MonStatus         string
 	Url               string
 	Interval          int
-	ExpRespCode       int
+	ExpRespCode       string
 	Timeout           int
 	Retries           int
 	LastStatus        string
@@ -44,7 +44,7 @@ func GetActiveMonitors() []Monitor {
 		var monstatus string
 		var url string
 		var intrvl int
-		var expRespCode int
+		var expRespCode string
 		var timeout int
 		var retries int
 		var laststatus string
@@ -83,7 +83,7 @@ func GetMonitorByName(name string) Monitor {
 	var monstatus string
 	var url string
 	var intrvl int
-	var expRespCode int
+	var expRespCode string
 	var timeout int
 	var retries int
 	var laststatus string

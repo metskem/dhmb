@@ -5,11 +5,13 @@ import (
 	"github.com/metskem/dhmb/db"
 	"log"
 	"net/http"
+	"regexp"
 	"time"
 )
 
 func Loop(m db.Monitor) {
 	retries := 0
+	matchPattern := regexp.MustCompile(m.ExpRespCode)
 	for {
 		client := http.Client{Timeout: time.Duration(m.Timeout) * time.Second}
 		startTime := time.Now()
@@ -17,7 +19,7 @@ func Loop(m db.Monitor) {
 		elapsed := int64(time.Since(startTime))
 		statusCode := 0
 		errorString := ""
-		if err == nil && resp != nil && resp.StatusCode == m.ExpRespCode {
+		if err == nil && resp != nil && matchPattern.MatchString(resp.Status) {
 			log.Printf("%s: OK, statusCode: %d", m.MonName, resp.StatusCode)
 			updateLastStatus(m, true, elapsed)
 			if retries >= m.Retries {
