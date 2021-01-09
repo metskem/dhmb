@@ -18,28 +18,29 @@ func (respTime RespTime) String() string {
 	return fmt.Sprintf("Id:%d monid:%d resptime:%d", respTime.Id, respTime.MonId, respTime.Time)
 }
 
-func GetRespTimes() []RespTime {
-	rows, err := Database.Query("select id, timestamp, monid, time from resptime", nil)
+func GetLatestRespTimesByMonname(monname string) []RespTime {
+	var result []RespTime
+	rows, err := Database.Query("select r.id, r.timestamp, r.monid, r.time from resptime r, monitor m where r.monid=m.id and m.monname=? order by r.timestamp limit ?", monname, conf.MaxPlots)
 	if err != nil {
 		log.Printf("failed to query table resptime, error: %s", err)
-	}
-	defer rows.Close()
-	var result []RespTime
-	for rows.Next() {
-		var id int
-		var timestamp time.Time
-		var monId int
-		var time int64
-		err = rows.Scan(&id, &timestamp, &monId, &time)
-		if err != nil {
-			log.Printf("error while scanning resptime table: %s", err)
+	} else {
+		defer rows.Close()
+		for rows.Next() {
+			var id int
+			var timestamp time.Time
+			var monId int
+			var time int64
+			err = rows.Scan(&id, &timestamp, &monId, &time)
+			if err != nil {
+				log.Printf("error while scanning resptime table: %s", err)
+			}
+			result = append(result, RespTime{
+				Id:        id,
+				Timestamp: timestamp,
+				MonId:     monId,
+				Time:      time,
+			})
 		}
-		result = append(result, RespTime{
-			Id:        id,
-			Timestamp: timestamp,
-			MonId:     monId,
-			Time:      time,
-		})
 	}
 	return result
 }

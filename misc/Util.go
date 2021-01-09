@@ -3,8 +3,12 @@ package misc
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/metskem/dhmb/conf"
 	"github.com/metskem/dhmb/db"
+	"github.com/wcharczuk/go-chart"
+	"github.com/wcharczuk/go-chart/drawing"
 	"log"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -122,6 +126,15 @@ func HandleCommand(update tgbotapi.Update) {
 		SendMessage(chatter, msg)
 	}
 
+	if strings.HasPrefix(update.Message.Text, "/chart") {
+		words := strings.Split(update.Message.Text, " ")
+		if len(words) == 2 {
+			SendChart(chatter, words[1])
+		} else {
+			SendMessage(chatter, "please specify /unsilence <monname>")
+		}
+	}
+
 	if strings.HasPrefix(update.Message.Text, "/usernameadd") {
 		words := strings.Split(update.Message.Text, " ")
 		if len(words) == 3 && (words[2] == db.UserNameRoleAdmin || words[2] == db.UserNameRoleReader) {
@@ -165,6 +178,69 @@ func HandleCommand(update tgbotapi.Update) {
 		}
 	}
 
+}
+
+func SendChart(chatter db.Chat, mon2chart string) {
+	respTimeObjects := db.GetLatestRespTimesByMonname(mon2chart)
+	if len(respTimeObjects) == 0 {
+		msg := fmt.Sprintf("no response times found for monitor : %s", mon2chart)
+		log.Print(msg)
+		SendMessage(chatter, msg)
+		return
+	}
+	var respTimes []float64
+	var xValues []time.Time
+	var highestValue int64
+	for ix, respTimeObject := range respTimeObjects {
+		if ix > conf.MaxPlots {
+			break
+		}
+		respTimes = append(respTimes, float64(respTimeObject.Time))
+		if respTimeObject.Time > highestValue {
+			highestValue = respTimeObject.Time
+		}
+		xValues = append(xValues, respTimeObject.Timestamp)
+	}
+	log.Printf("rendering %d plots for %s", len(xValues), mon2chart)
+	graph := chart.Chart{
+		Title: fmt.Sprintf("%s response time (ms)", mon2chart),
+		XAxis: chart.XAxis{
+			ValueFormatter: chart.TimeValueFormatterWithFormat("2006-01-02T15:04"),
+		},
+		YAxis: chart.YAxis{
+			ValueFormatter: func(v interface{}) string {
+				if vf, isFloat := v.(float64); isFloat {
+					return fmt.Sprintf("%0.0f", vf)
+				}
+				return ""
+			},
+			Range: &chart.ContinuousRange{
+				Min: 0,
+				Max: float64(highestValue),
+			},
+		},
+		Series: []chart.Series{
+			chart.TimeSeries{
+				Style: chart.Style{
+					FillColor: drawing.ColorFromHex("6a839e"),
+				},
+				XValues: xValues,
+				YValues: respTimes,
+			},
+		},
+	}
+
+	f, _ := os.Create(fmt.Sprintf("dhmb-%sresptimes.png", mon2chart))
+	defer f.Close()
+	err := graph.Render(chart.PNG, f)
+	if err != nil {
+		msg := fmt.Sprintf("failed to render graph, error: %s", err)
+		log.Print(msg)
+		SendMessage(chatter, msg)
+	} else {
+		photoConfig := tgbotapi.NewDocumentUpload(chatter.ChatId, f.Name())
+		_, err = Bot.Send(photoConfig)
+	}
 }
 
 /**

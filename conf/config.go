@@ -21,6 +21,7 @@ var (
 	Debug              bool
 	MaxRowsResptimeStr = os.Getenv("MAX_ROWS_RESPTIME")
 	MaxRowsResptime    int
+	MaxPlots           = 500
 )
 
 func EnvironmentComplete() {

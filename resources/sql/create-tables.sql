@@ -1,3 +1,4 @@
+drop table if exists resptime;
 drop table if exists monitor;
 create table monitor
 (
@@ -38,20 +39,3 @@ create table resptime
     time      integer not null,
     foreign key (monid) references monitor (id) on delete cascade
 );
-
---  to alter a table, you usually end up with:
--- create table-new (with different columns)
-INSERT INTO monitor2 SELECT * FROM monitor;
-
--- drop a table
-drop table monitor;
-
--- show schema of a table
-.schema monitor
-
--- rename a table
-alter table monitor2 rename to monitor;
-
--- add a column
-alter table resptime
-    add column timestamp timestamp default current_timestamp; -- does not work: Error: Cannot add a column with non-constant default
