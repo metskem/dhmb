@@ -57,7 +57,7 @@ func InsertRespTime(respTime RespTime) int64 {
 	} else {
 		result, err := statement.Exec(respTime.Timestamp, respTime.MonId, respTime.Time)
 		if err != nil {
-			log.Printf("failed to insert monid %d, timestamp %s, time %d, error: %s", respTime.Timestamp.Format(time.RFC3339), respTime.MonId, respTime.Time, err)
+			log.Printf("failed to insert monid %d, timestamp %s, time %d, error: %s", respTime.MonId, respTime.Timestamp.Format(time.RFC3339), respTime.Time, err)
 			return 0
 		} else {
 			lastInsertId, err := result.LastInsertId()
