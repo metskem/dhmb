@@ -26,9 +26,8 @@ func GetLatestRespTimesByMonname(monname string) []RespTime {
 	} else {
 		defer rows.Close()
 		for rows.Next() {
-			var id int
+			var id, monId int
 			var timestamp time.Time
-			var monId int
 			var time int64
 			err = rows.Scan(&id, &timestamp, &monId, &time)
 			if err != nil {

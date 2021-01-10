@@ -75,10 +75,10 @@ func main() {
 							fromUser = chat.UserName
 						}
 						// /status can be done by anyone, for the other cmds you need admin role
-						if misc.HasRole(fromUser, db.UserNameRoleAdmin) || strings.HasPrefix(update.Message.Text, "/status") {
+						if misc.HasRole(fromUser, db.UserNameRoleAdmin) || strings.HasPrefix(update.Message.Text, "/status") || strings.HasPrefix(update.Message.Text, "/chart") {
 							misc.HandleCommand(update)
 						} else {
-							misc.SendMessage(db.Chat{ChatId: chat.ID}, fmt.Sprintf("sorry, %s is not allowed to send me commands", fromUser))
+							misc.SendMessage(db.Chat{ChatId: chat.ID}, fmt.Sprintf("sorry, %s is not allowed to send me that command", fromUser))
 						}
 					}
 				}

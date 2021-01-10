@@ -85,6 +85,7 @@ func HandleCommand(update tgbotapi.Update) {
 			mon2silence := db.GetMonitorByName(words[1])
 			mon2silence.MonStatus = db.MonStatusSilenced
 			db.UpdateMonitor(mon2silence)
+			log.Printf("%s silenced by %s", mon2silence.MonName, update.Message.From.UserName)
 			SendMessage(chatter, fmt.Sprintf("%s silenced", mon2silence.MonName))
 		} else {
 			SendMessage(chatter, "please specify /silence <monname>")
@@ -97,6 +98,7 @@ func HandleCommand(update tgbotapi.Update) {
 			mon2silence := db.GetMonitorByName(words[1])
 			mon2silence.MonStatus = db.MonStatusActive
 			db.UpdateMonitor(mon2silence)
+			log.Printf("%s unsilenced by %s", mon2silence.MonName, update.Message.From.UserName)
 			SendMessage(chatter, fmt.Sprintf("%s unsilenced", mon2silence.MonName))
 		} else {
 			SendMessage(chatter, "please specify /unsilence <monname>")
@@ -129,7 +131,7 @@ func HandleCommand(update tgbotapi.Update) {
 	if strings.HasPrefix(update.Message.Text, "/chart") {
 		words := strings.Split(update.Message.Text, " ")
 		if len(words) == 2 {
-			SendChart(chatter, words[1])
+			SendChart(update, words[1])
 		} else {
 			SendMessage(chatter, "please specify /unsilence <monname>")
 		}
@@ -141,7 +143,7 @@ func HandleCommand(update tgbotapi.Update) {
 			if strings.HasSuffix(update.Message.Text, fmt.Sprintf(" %s", db.UserNameRoleReader)) {
 				if db.InsertUserName(db.UserName{Name: words[1], Role: db.UserNameRoleReader}) != 0 {
 					SendMessage(chatter, fmt.Sprintf("username %s with role %s added", words[1], words[2]))
-					log.Printf("username %s with role %s added", words[1], words[2])
+					log.Printf("username %s with role %s added by %s", words[1], words[2], update.Message.From.UserName)
 				} else {
 					SendMessage(chatter, fmt.Sprintf("username %s with role %s not added", words[1], words[2]))
 					log.Printf("username %s with role %s not added", words[1], words[2])
@@ -151,7 +153,7 @@ func HandleCommand(update tgbotapi.Update) {
 				if strings.HasSuffix(update.Message.Text, fmt.Sprintf(" %s", db.UserNameRoleAdmin)) {
 					if db.InsertUserName(db.UserName{Name: words[1], Role: db.UserNameRoleAdmin}) != 0 {
 						SendMessage(chatter, fmt.Sprintf("username %s with role %s added", words[1], words[2]))
-						log.Printf("username %s with role %s added", words[1], words[2])
+						log.Printf("username %s with role %s added by %s", words[1], words[2], update.Message.From.UserName)
 					} else {
 						SendMessage(chatter, fmt.Sprintf("username %s with role %s not added", words[1], words[2]))
 						log.Printf("username %s with role %s not added", words[1], words[2])
@@ -168,7 +170,7 @@ func HandleCommand(update tgbotapi.Update) {
 		if len(words) == 2 {
 			if db.DeleteUserName(words[1]) {
 				SendMessage(chatter, fmt.Sprintf("username %s deleted", words[1]))
-				log.Printf("username %s deleted", words[1])
+				log.Printf("username %s deleted by %s", words[1], update.Message.From.UserName)
 			} else {
 				SendMessage(chatter, fmt.Sprintf("username %s not deleted", words[1]))
 				log.Printf("username %s not deleted", words[1])
@@ -180,7 +182,9 @@ func HandleCommand(update tgbotapi.Update) {
 
 }
 
-func SendChart(chatter db.Chat, mon2chart string) {
+// Create a simple line chart for the mon2chart response times, and send that to the user
+func SendChart(update tgbotapi.Update, mon2chart string) {
+	chatter := db.Chat{ChatId: update.Message.Chat.ID}
 	respTimeObjects := db.GetLatestRespTimesByMonname(mon2chart)
 	if len(respTimeObjects) == 0 {
 		msg := fmt.Sprintf("no response times found for monitor : %s", mon2chart)
@@ -190,7 +194,7 @@ func SendChart(chatter db.Chat, mon2chart string) {
 	}
 	var respTimes []float64
 	var xValues []time.Time
-	var highestValue int64
+	var highestValue int64 // we need that to determine the height of the graph
 	for ix, respTimeObject := range respTimeObjects {
 		if ix > conf.MaxPlots {
 			break
@@ -201,7 +205,7 @@ func SendChart(chatter db.Chat, mon2chart string) {
 		}
 		xValues = append(xValues, respTimeObject.Timestamp)
 	}
-	log.Printf("rendering %d plots for %s", len(xValues), mon2chart)
+	log.Printf("rendering %d plots for monitor %s for user %s", len(xValues), mon2chart, update.Message.From.UserName)
 	graph := chart.Chart{
 		Title: fmt.Sprintf("%s response time (ms)", mon2chart),
 		XAxis: chart.XAxis{
@@ -230,7 +234,7 @@ func SendChart(chatter db.Chat, mon2chart string) {
 		},
 	}
 
-	f, _ := os.Create(fmt.Sprintf("dhmb-%sresptimes.png", mon2chart))
+	f, _ := os.Create(fmt.Sprintf("%s/dhmb-%s-resptimes.png", os.TempDir(), mon2chart))
 	defer f.Close()
 	err := graph.Render(chart.PNG, f)
 	if err != nil {

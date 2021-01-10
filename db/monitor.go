@@ -39,15 +39,8 @@ func GetActiveMonitors() []Monitor {
 	var result []Monitor
 	for rows.Next() {
 		var id int
-		var monname string
-		var montype string
-		var monstatus string
-		var url string
-		var intrvl int
-		var expRespCode string
-		var timeout int
-		var retries int
-		var laststatus string
+		var monname, montype, monstatus, url, expRespCode, laststatus string
+		var intrvl, timeout, retries int
 		var laststatuschanged time.Time
 		err = rows.Scan(&id, &monname, &montype, &monstatus, &url, &intrvl, &expRespCode, &timeout, &retries, &laststatus, &laststatuschanged)
 		if err != nil {
@@ -78,15 +71,8 @@ func GetMonitorByName(name string) Monitor {
 	}
 	defer statement.Close()
 	var id int
-	var monname string
-	var montype string
-	var monstatus string
-	var url string
-	var intrvl int
-	var expRespCode string
-	var timeout int
-	var retries int
-	var laststatus string
+	var monname, montype, monstatus, url, expRespCode, laststatus string
+	var intrvl, timeout, retries int
 	var laststatuschanged time.Time
 	err = statement.QueryRow(name).Scan(&id, &monname, &montype, &monstatus, &url, &intrvl, &expRespCode, &timeout, &retries, &laststatus, &laststatuschanged)
 	if err != nil {

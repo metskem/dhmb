@@ -21,7 +21,7 @@ var (
 	Debug              bool
 	MaxRowsResptimeStr = os.Getenv("MAX_ROWS_RESPTIME")
 	MaxRowsResptime    int
-	MaxPlots           = 500
+	MaxPlots           int
 )
 
 func EnvironmentComplete() {
@@ -37,10 +37,10 @@ func EnvironmentComplete() {
 		Debug = true
 	}
 
-	MaxRowsResptime = 1000
 	if MaxRowsResptimeStr != "" {
 		MaxRowsResptime, _ = strconv.Atoi(MaxRowsResptimeStr)
 	}
+	MaxPlots = MaxRowsResptime // for now we render all available observations
 
 	if !envComplete {
 		log.Fatal("one or more envvars missing, aborting...")

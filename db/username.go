@@ -27,8 +27,7 @@ func GetUserNames() []UserName {
 	var result []UserName
 	for rows.Next() {
 		var id int
-		var name string
-		var role string
+		var name, role string
 		err = rows.Scan(&id, &name, &role)
 		if err != nil {
 			log.Printf("error while scanning username table: %s", err)
