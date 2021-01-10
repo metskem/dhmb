@@ -20,7 +20,7 @@ var (
 	DebugStr           = os.Getenv("DEBUG")
 	Debug              bool
 	MaxRowsResptimeStr = os.Getenv("MAX_ROWS_RESPTIME")
-	MaxRowsResptime    int
+	MaxRowsResptime    = 1000
 	MaxPlots           int
 )
 
