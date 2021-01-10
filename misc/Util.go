@@ -182,7 +182,7 @@ func HandleCommand(update tgbotapi.Update) {
 
 }
 
-// Create a simple line chart for the mon2chart response times, and send that to the user
+// Create a simple line chart for the mon2chart response times, and sends that to the user
 func SendChart(update tgbotapi.Update, mon2chart string) {
 	chatter := db.Chat{ChatId: update.Message.Chat.ID}
 	respTimeObjects := db.GetLatestRespTimesByMonname(mon2chart)
@@ -247,9 +247,8 @@ func SendChart(update tgbotapi.Update, mon2chart string) {
 	}
 }
 
-/**
-Wait for the monitor interval to expire before returning with false. If returned with true, a restart is requested, and the caller can decide to no longer loop.
-*/
+// Wait for the monitor interval to expire before returning with false.
+// If returned with true, a restart is requested, and the caller can decide to no longer loop.
 func RestartOrWait(m db.Monitor) bool {
 	endWaitTime := time.Now().Add(time.Duration(m.Interval) * time.Second)
 	for true {
@@ -269,9 +268,7 @@ func RestartOrWait(m db.Monitor) bool {
 	return false
 }
 
-/*
-  Iterate over the monitors in the monitor table, and start a separate go routine for a check
-*/
+// Iterate over the monitors in the monitor table, and start a separate go routine that keeps doing the check
 func Runner() {
 	for RestartRequested && NumRunningMonitors != 0 {
 		time.Sleep(time.Second * 3)
@@ -293,6 +290,7 @@ func Runner() {
 	log.Printf("we have %d running monitors", NumRunningMonitors)
 }
 
+// returns true if the given user has the given role
 func HasRole(userName string, roleName string) bool {
 	for _, dbuser := range db.GetUserNames() {
 		if dbuser.Name == userName && dbuser.Role == roleName {
@@ -303,9 +301,7 @@ func HasRole(userName string, roleName string) bool {
 	return false
 }
 
-/*
-  Returns if we are mentioned and if we were commanded
-*/
+// Returns if we are mentioned and if we were commanded
 func TalkOrCmdToMe(update tgbotapi.Update) (bool, bool) {
 	entities := update.Message.Entities
 	var mentioned = false
@@ -332,6 +328,22 @@ func TalkOrCmdToMe(update tgbotapi.Update) (bool, bool) {
 	return mentioned, botCmd
 }
 
+// check for each monitor what the last resptime update was, if too old, log and broadcast a warning
+func CheckLastRespTimeUpdates() {
+	maxAge := time.Minute * 15
+	oldestTime := time.Now().Add(-maxAge)
+	timestamps := db.GetNewestTimestamps()
+	for monid, timestamp := range timestamps {
+		if timestamp.Before(oldestTime) {
+			monitor := db.GetMonitorById(monid)
+			msg := fmt.Sprintf("outdated responses (%s) found for %s, is the monitor still running? Consider a restart", timestamp, monitor)
+			log.Print(msg)
+			Broadcast(msg)
+		}
+	}
+}
+
+// send message to all admins
 func Broadcast(message string) {
 	for _, chat := range db.GetChats() {
 		if HasRole(chat.Name, db.UserNameRoleAdmin) {

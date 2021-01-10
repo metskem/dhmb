@@ -44,6 +44,32 @@ func GetLatestRespTimesByMonname(monname string) []RespTime {
 	return result
 }
 
+// return the last resptime update for each monitor, a map of timestamps is returned, key-ed by monid
+func GetNewestTimestamps() map[int]time.Time {
+	var dateFormat = "2006-01-02 15:04:05Z07:00"
+	var result = make(map[int]time.Time)
+	rows, err := Database.Query("select monid,max(timestamp) from resptime group by monid order by monid")
+	if err != nil {
+		log.Printf("failed to newest timestamps from resptime, error: %s", err)
+	} else {
+		defer rows.Close()
+		for rows.Next() {
+			var monId int
+			var timestampStr string
+			err = rows.Scan(&monId, &timestampStr)
+			if err != nil {
+				log.Printf("error while scanning resptime table: %s", err)
+			}
+			timestamp, err := time.Parse(dateFormat, timestampStr)
+			if err != nil {
+				log.Printf("failed to parse timestamp from resptime, error: %s", err)
+			}
+			result[monId] = timestamp
+		}
+	}
+	return result
+}
+
 /**
   Insert a row into the resptime table using the given resptime. Returns the lastInsertId of the insert operation.
 */

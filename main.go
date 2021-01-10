@@ -39,10 +39,18 @@ func main() {
 	// fire up a background thread that regularly deletes old rows from the resptime table
 	go func() {
 		for {
+			time.Sleep(time.Minute * 10)
 			for _, mon := range db.GetActiveMonitors() {
 				db.CleanupOldStuffForMonitor(mon)
 			}
-			time.Sleep(time.Second * 600)
+		}
+	}()
+
+	// fire up a background thread that monitors the currently running routines by checking if the last resptime update is recent enough
+	go func() {
+		for {
+			time.Sleep(time.Minute * 12)
+			misc.CheckLastRespTimeUpdates()
 		}
 	}()
 

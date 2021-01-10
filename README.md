@@ -12,9 +12,9 @@ Can monitor resources at specified intervals, and optionally send updates if a t
 ## Supported Bot Commands
 
 The following commands are supported (and can/should be configured with BotFather (Edit Commands) for convenience):
-
 ```
 status - show the current status of all monitors
+chart - <monname> - create a response time chart for monname
 members - show active chats (users and groups)
 usernames - show usernames (names and their role)
 debug - [on|off] - dynamically turn Telegram Bot debugging on/off
@@ -23,7 +23,6 @@ usernameadd - <username> [reader|admin] - add a username
 usernamedelete - <username> - delete a username
 silence - <monname> - silence a monitor (keep monitoring, but no alerts)
 unsilence - <monname> - unsilence a monitor (revert the silence)
-chart - <monname> - create a response time chart for monname
 ``` 
 
 ## Configuration
@@ -35,7 +34,7 @@ All configuration is done with environment variables. The following envvars are 
 
 ## TODO
 
-* - make the row cleanup configurable with an envvar
+* v - make the row cleanup configurable with an envvar
 * v - provide  response time graphs using https://github.com/go-echarts/go-echarts and
        photoConfig := tgbotapi.NewDocumentUpload(chatter.ChatId, f.Name())
      	_, err := Bot.Send(photoConfig)

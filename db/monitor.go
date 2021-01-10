@@ -94,6 +94,37 @@ func GetMonitorByName(name string) Monitor {
 	}
 }
 
+func GetMonitorById(Id int) Monitor {
+	selectSQL := "select * from monitor where id=?"
+	statement, err := Database.Prepare(selectSQL)
+	if err != nil {
+		log.Fatalf("failed to prepare stmt for select monitor with id %d, error: %s", Id, err)
+	}
+	defer statement.Close()
+	var id int
+	var monname, montype, monstatus, url, expRespCode, laststatus string
+	var intrvl, timeout, retries int
+	var laststatuschanged time.Time
+	err = statement.QueryRow(Id).Scan(&id, &monname, &montype, &monstatus, &url, &intrvl, &expRespCode, &timeout, &retries, &laststatus, &laststatuschanged)
+	if err != nil {
+		log.Printf("failed to get monitor with id %d, error: %s", Id, err)
+		return Monitor{}
+	}
+	return Monitor{
+		Id:                id,
+		MonName:           monname,
+		MonType:           montype,
+		MonStatus:         monstatus,
+		Url:               url,
+		Interval:          intrvl,
+		ExpRespCode:       expRespCode,
+		Timeout:           timeout,
+		Retries:           retries,
+		LastStatus:        laststatus,
+		LastStatusChanged: laststatuschanged,
+	}
+}
+
 func UpdateMonitor(mon Monitor) {
 	updateSQL := "update monitor set monname=?,montype=?,monstatus=?,url=?,intrvl=?,exp_resp_code=?,timeout=?,retries=?,laststatus=?,laststatuschanged=? where monname=?"
 	statement, err := Database.Prepare(updateSQL)
