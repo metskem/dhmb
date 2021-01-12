@@ -133,7 +133,7 @@ func HandleCommand(update tgbotapi.Update) {
 		if len(words) == 2 {
 			SendChart(update, words[1])
 		} else {
-			SendMessage(chatter, "please specify /unsilence <monname>")
+			SendMessage(chatter, "please specify /chart <monname>")
 		}
 	}
 
