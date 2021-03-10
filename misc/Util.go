@@ -50,8 +50,13 @@ func HandleCommand(update tgbotapi.Update) {
 
 	if strings.HasPrefix(update.Message.Text, "/status") {
 		var msg string
-		for ix, mon := range db.GetActiveMonitors() {
-			msg = fmt.Sprintf("%s%d - %s: %s since %s\n", msg, ix, mon.MonName, mon.LastStatus, mon.LastStatusChanged.Format(time.RFC3339))
+		monitors, err := db.GetActiveMonitors()
+		if err != nil {
+			msg = fmt.Sprintf("failed to get active monitors, error: %s", err)
+		} else {
+			for ix, mon := range monitors {
+				msg = fmt.Sprintf("%s%d - %s: %s since %s\n", msg, ix, mon.MonName, mon.LastStatus, mon.LastStatusChanged.Format(time.RFC3339))
+			}
 		}
 		log.Println("\n" + msg)
 		SendMessage(chatter, msg)
@@ -82,11 +87,16 @@ func HandleCommand(update tgbotapi.Update) {
 	if strings.HasPrefix(update.Message.Text, "/silence") {
 		words := strings.Split(update.Message.Text, " ")
 		if len(words) == 2 {
-			mon2silence := db.GetMonitorByName(words[1])
-			mon2silence.MonStatus = db.MonStatusSilenced
-			db.UpdateMonitor(mon2silence)
-			log.Printf("%s silenced by %s", mon2silence.MonName, update.Message.From.UserName)
-			SendMessage(chatter, fmt.Sprintf("%s silenced", mon2silence.MonName))
+			monitor, err := db.GetMonitorByName(words[1])
+			if err != nil {
+				log.Printf("failed getting monitor %s, error: %s", words[1], err)
+			} else {
+				mon2silence := monitor
+				mon2silence.MonStatus = db.MonStatusSilenced
+				db.UpdateMonitor(mon2silence)
+				log.Printf("%s silenced by %s", mon2silence.MonName, update.Message.From.UserName)
+				SendMessage(chatter, fmt.Sprintf("%s silenced", mon2silence.MonName))
+			}
 		} else {
 			SendMessage(chatter, "please specify /silence <monname>")
 		}
@@ -95,11 +105,16 @@ func HandleCommand(update tgbotapi.Update) {
 	if strings.HasPrefix(update.Message.Text, "/unsilence") {
 		words := strings.Split(update.Message.Text, " ")
 		if len(words) == 2 {
-			mon2silence := db.GetMonitorByName(words[1])
-			mon2silence.MonStatus = db.MonStatusActive
-			db.UpdateMonitor(mon2silence)
-			log.Printf("%s unsilenced by %s", mon2silence.MonName, update.Message.From.UserName)
-			SendMessage(chatter, fmt.Sprintf("%s unsilenced", mon2silence.MonName))
+			monitor, err := db.GetMonitorByName(words[1])
+			if err != nil {
+				log.Printf("failed getting monitor %s, error: %s", words[1], err)
+			} else {
+				mon2silence := monitor
+				mon2silence.MonStatus = db.MonStatusActive
+				db.UpdateMonitor(mon2silence)
+				log.Printf("%s unsilenced by %s", mon2silence.MonName, update.Message.From.UserName)
+				SendMessage(chatter, fmt.Sprintf("%s unsilenced", mon2silence.MonName))
+			}
 		} else {
 			SendMessage(chatter, "please specify /unsilence <monname>")
 		}
@@ -275,19 +290,24 @@ func Runner() {
 		log.Printf("waiting for restart to complete, number of running monitors is %d...\n", NumRunningMonitors)
 	}
 	RestartRequested = false
-	for _, m := range db.GetActiveMonitors() {
-		monitor := m
-		go func(db.Monitor) {
-			if monitor.MonType == db.MonTypeHttp {
-				Loop(monitor)
-			}
-		}(monitor)
-		MonCountLock.Lock()
-		NumRunningMonitors++
-		log.Printf("started %s, num monitors is %d", m, NumRunningMonitors)
-		MonCountLock.Unlock()
+	monitors, err := db.GetActiveMonitors()
+	if err == nil {
+		for _, m := range monitors {
+			monitor := m
+			go func(db.Monitor) {
+				if monitor.MonType == db.MonTypeHttp {
+					Loop(monitor)
+				}
+			}(monitor)
+			MonCountLock.Lock()
+			NumRunningMonitors++
+			log.Printf("started %s, num monitors is %d", m, NumRunningMonitors)
+			MonCountLock.Unlock()
+		}
+		log.Printf("we have %d running monitors", NumRunningMonitors)
+	} else {
+		log.Fatalf("could not start Runner, error: %s", err)
 	}
-	log.Printf("we have %d running monitors", NumRunningMonitors)
 }
 
 // returns true if the given user has the given role
@@ -335,10 +355,14 @@ func CheckLastRespTimeUpdates() {
 	timestamps := db.GetNewestTimestamps()
 	for monid, timestamp := range timestamps {
 		if timestamp.Before(oldestTime) {
-			monitor := db.GetMonitorById(monid)
-			msg := fmt.Sprintf("outdated responses (%s) found for %s, is the monitor still running? Consider a restart", timestamp, monitor)
-			log.Print(msg)
-			Broadcast(msg)
+			monitor, err := db.GetMonitorById(monid)
+			if err == nil {
+				msg := fmt.Sprintf("outdated responses (%s) found for %s, is the monitor still running? Consider a restart", timestamp, monitor)
+				log.Print(msg)
+				Broadcast(msg)
+			} else {
+				log.Printf("failed to check last resptime updates, error: %s", err)
+			}
 		}
 	}
 }

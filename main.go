@@ -40,8 +40,11 @@ func main() {
 	go func() {
 		for {
 			time.Sleep(time.Minute * 10)
-			for _, mon := range db.GetActiveMonitors() {
-				db.CleanupOldStuffForMonitor(mon)
+			monitors, err := db.GetActiveMonitors()
+			if err == nil {
+				for _, mon := range monitors {
+					db.CleanupOldStuffForMonitor(mon)
+				}
 			}
 		}
 	}()

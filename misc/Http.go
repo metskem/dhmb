@@ -48,18 +48,20 @@ func Loop(m db.Monitor) {
 }
 
 func updateLastStatus(m db.Monitor, statusUp bool, respTime int64) {
-	monFromDB := db.GetMonitorByName(m.MonName)
-	if monFromDB.LastStatus != db.MonLastStatusUp && statusUp {
-		monFromDB.LastStatus = db.MonLastStatusUp
-		monFromDB.LastStatusChanged = time.Now()
-		db.UpdateMonitor(monFromDB)
+	monFromDB, err := db.GetMonitorByName(m.MonName)
+	if err == nil {
+		if monFromDB.LastStatus != db.MonLastStatusUp && statusUp {
+			monFromDB.LastStatus = db.MonLastStatusUp
+			monFromDB.LastStatusChanged = time.Now()
+			db.UpdateMonitor(monFromDB)
+		}
+		if monFromDB.LastStatus != db.MonLastStatusDown && !statusUp {
+			monFromDB.LastStatus = db.MonLastStatusDown
+			monFromDB.LastStatusChanged = time.Now()
+			db.UpdateMonitor(monFromDB)
+		}
+		recordResponseTime(m, respTime)
 	}
-	if monFromDB.LastStatus != db.MonLastStatusDown && !statusUp {
-		monFromDB.LastStatus = db.MonLastStatusDown
-		monFromDB.LastStatusChanged = time.Now()
-		db.UpdateMonitor(monFromDB)
-	}
-	recordResponseTime(m, respTime)
 }
 
 func alert(statusUp bool, m db.Monitor, statusCode int, errorString string) {
