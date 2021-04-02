@@ -53,12 +53,12 @@ func updateLastStatus(m db.Monitor, statusUp bool, respTime int64) {
 		if monFromDB.LastStatus != db.MonLastStatusUp && statusUp {
 			monFromDB.LastStatus = db.MonLastStatusUp
 			monFromDB.LastStatusChanged = time.Now()
-			db.UpdateMonitor(monFromDB)
+			_ = db.UpdateMonitor(monFromDB)
 		}
 		if monFromDB.LastStatus != db.MonLastStatusDown && !statusUp {
 			monFromDB.LastStatus = db.MonLastStatusDown
 			monFromDB.LastStatusChanged = time.Now()
-			db.UpdateMonitor(monFromDB)
+			_ = db.UpdateMonitor(monFromDB)
 		}
 		recordResponseTime(m, respTime)
 	}
