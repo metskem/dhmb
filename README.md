@@ -30,7 +30,8 @@ unsilence - <monname> - unsilence a monitor (revert the silence)
 All configuration is done with environment variables. The following envvars are available:
 * **BOT_TOKEN** - the Telegram bot token, should be in the format <number>:<token>
 * **MAX_ROWS_RESPTIME** - The oldest rows in the resptime table are deleted each 10 minutes. This envvar defines how many rows remain per monitor. Default = 1000
-* **DEBUG** - true/false, whether the bot debug should be on or off. Default is false 
+* **DEBUG** - true/false, whether the bot debug should be on or off. Default is false
+* **PROMETHEUS_EXPORTER_PORT** - The port to use for exposing the prometheus exporter (default is 9094). The metric `dhmb_resptime`, with labels `name` and `status` is exposed.
 
 ## TODO
 

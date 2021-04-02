@@ -3,6 +3,7 @@ package misc
 import (
 	"fmt"
 	"github.com/metskem/dhmb/db"
+	"github.com/metskem/dhmb/exporter"
 	"log"
 	"net/http"
 	"regexp"
@@ -48,6 +49,7 @@ func Loop(m db.Monitor) {
 }
 
 func updateLastStatus(m db.Monitor, statusUp bool, respTime int64) {
+	exporter.LastSeenMonitors[m.MonName] = exporter.LastSeenMonitor{Timestamp: time.Now(), Resptime: respTime / 1000000, StatusUp: statusUp}
 	monFromDB, err := db.GetMonitorByName(m.MonName)
 	if err == nil {
 		if monFromDB.LastStatus != db.MonLastStatusUp && statusUp {

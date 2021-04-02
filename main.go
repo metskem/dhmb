@@ -5,8 +5,12 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/metskem/dhmb/conf"
 	"github.com/metskem/dhmb/db"
+	"github.com/metskem/dhmb/exporter"
 	"github.com/metskem/dhmb/misc"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -56,6 +60,18 @@ func main() {
 			time.Sleep(time.Minute * 12)
 			misc.CheckLastRespTimeUpdates()
 		}
+	}()
+
+	// start the exporter exporter
+	go func() {
+		//Create a new instance of the collector and register with the exporter client.
+		collector := exporter.NewDHMBbCollector()
+		prometheus.MustRegister(collector)
+
+		// expose metrics on the /metrics endpoint.
+		http.Handle("/metrics", promhttp.Handler())
+		log.Printf("Prometheus exporter on port %d", conf.PromExporterPort)
+		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", conf.PromExporterPort), nil))
 	}()
 
 	newUpdate := tgbotapi.NewUpdate(0)
