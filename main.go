@@ -62,7 +62,7 @@ func main() {
 		}
 	}()
 
-	// start the exporter exporter
+	// start the prometheus exporter
 	go func() {
 		//Create a new instance of the collector and register with the exporter client.
 		collector := exporter.NewDHMBbCollector()
