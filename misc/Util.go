@@ -50,7 +50,7 @@ func HandleCommand(update tgbotapi.Update) {
 
 	if strings.HasPrefix(update.Message.Text, "/status") {
 		var msg string
-		monitors, err := db.GetActiveMonitors()
+		monitors, err := db.GetMonitorsByStatus(db.MonStatusAll)
 		if err != nil {
 			msg = fmt.Sprintf("failed to get active monitors, error: %s", err)
 		} else {
@@ -290,7 +290,7 @@ func Runner() {
 		log.Printf("waiting for restart to complete, number of running monitors is %d...\n", NumRunningMonitors)
 	}
 	RestartRequested = false
-	monitors, err := db.GetActiveMonitors()
+	monitors, err := db.GetMonitorsByStatus(db.MonStatusActive)
 	if err == nil {
 		for _, m := range monitors {
 			monitor := m

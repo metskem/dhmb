@@ -45,7 +45,7 @@ func main() {
 	go func() {
 		for {
 			time.Sleep(time.Minute * 10)
-			monitors, err := db.GetActiveMonitors()
+			monitors, err := db.GetMonitorsByStatus(db.MonStatusActive)
 			if err == nil {
 				for _, mon := range monitors {
 					db.CleanupOldStuffForMonitor(mon)

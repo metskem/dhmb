@@ -24,6 +24,7 @@ type Monitor struct {
 const MonTypeHttp = "http"
 const MonStatusActive = "active"
 const MonStatusSilenced = "silenced"
+const MonStatusAll = "all"
 const MonLastStatusUp = "up"
 const MonLastStatusDown = "down"
 
@@ -31,9 +32,14 @@ func (m Monitor) String() string {
 	return fmt.Sprintf("monname:%s type:%s", m.MonName, m.MonType)
 }
 
-func GetActiveMonitors() ([]Monitor, error) {
+/* GetMonitorsByStatus*/
+func GetMonitorsByStatus(status string) ([]Monitor, error) {
 	var err error
-	rows, err := Database.Query(fmt.Sprintf("select * from monitor where monstatus=\"%s\" order by monname", MonStatusActive), nil)
+	queryString := fmt.Sprintf("select * from monitor where monstatus=\"%s\" order by monname", status)
+	if status == MonStatusAll {
+		queryString = "select * from monitor order by monname"
+	}
+	rows, err := Database.Query(queryString, nil)
 	if err != nil {
 		log.Printf("failed to query table monitor, error: %s", err)
 	}
