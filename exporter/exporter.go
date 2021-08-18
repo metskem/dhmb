@@ -21,7 +21,7 @@ func NewDHMBbCollector() *dhmbCollector {
 	return &dhmbCollector{resptimeMetric: prometheus.NewDesc("dhmb_resptime", "Response time in ms", []string{"name", "status"}, nil)}
 }
 
-//Each and every collector must implement the Describe function. It essentially writes all descriptors to the exporter desc channel.
+// Describe - Each and every collector must implement the Describe function. It essentially writes all descriptors to the exporter desc channel.
 func (collector *dhmbCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.resptimeMetric
 }
@@ -29,7 +29,7 @@ func (collector *dhmbCollector) Describe(ch chan<- *prometheus.Desc) {
 func (collector *dhmbCollector) Collect(ch chan<- prometheus.Metric) {
 	var status string
 	for name, lastSeenMon := range LastSeenMonitors {
-		if lastSeenMon.Timestamp.Add(5 * time.Minute).After(time.Now()) {
+		if lastSeenMon.Timestamp.After(time.Now().Add(-5 * time.Minute)) {
 			status = "DOWN"
 			if lastSeenMon.StatusUp {
 				status = "UP"
