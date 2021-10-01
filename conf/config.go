@@ -10,8 +10,8 @@ const DatabaseURL = "file:dhmb.db"
 const CreateTablesFile = "resources/sql/create-tables.sql"
 const InsertTestDataFile = "resources/sql/insert-testdata.sql"
 
-// Variables to identify the build
 var (
+	// Variables to identify the build
 	CommitHash string
 	VersionTag string
 	BuildTime  string

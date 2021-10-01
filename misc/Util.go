@@ -22,7 +22,16 @@ var MonCountLock = sync.RWMutex{}
 var Bot *tgbotapi.BotAPI
 
 func SendMessage(chat db.Chat, message string) {
-	_, err := Bot.Send(tgbotapi.NewMessage(chat.ChatId, message))
+	msgConfig := tgbotapi.MessageConfig{
+		BaseChat: tgbotapi.BaseChat{
+			ChatID:           chat.ChatId,
+			ReplyToMessageID: 0,
+		},
+		Text:                  message,
+		DisableWebPagePreview: true,
+	}
+
+	_, err := Bot.Send(msgConfig)
 	if err != nil {
 		log.Printf("failed sending message to chat %d, error is %v", chat.ChatId, err)
 		if err.Error() == "Forbidden: bot was blocked by the user" || err.Error() == "Forbidden: bot was kicked from the group chat" {
@@ -241,6 +250,7 @@ func SendChart(update tgbotapi.Update, mon2chart string) {
 		Series: []chart.Series{
 			chart.TimeSeries{
 				Style: chart.Style{
+					Show:      true,
 					FillColor: drawing.ColorFromHex("6a839e"),
 				},
 				XValues: xValues,
