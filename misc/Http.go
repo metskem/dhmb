@@ -17,7 +17,7 @@ func Loop(m db.Monitor) {
 		client := http.Client{Timeout: time.Duration(m.Timeout) * time.Second}
 		startTime := time.Now()
 		resp, err := client.Get(m.Url)
-		elapsed := int64(time.Since(startTime))
+		elapsed := time.Since(startTime).Milliseconds()
 		statusCode := 0
 		errorString := ""
 		if err == nil && resp != nil && matchPattern.MatchString(resp.Status) {
@@ -49,7 +49,7 @@ func Loop(m db.Monitor) {
 }
 
 func updateLastStatus(m db.Monitor, statusUp bool, respTime int64) {
-	exporter.LastSeenMonitors[m.MonName] = exporter.LastSeenMonitor{Timestamp: time.Now(), Resptime: respTime / 1000000, StatusUp: statusUp}
+	exporter.LastSeenMonitors[m.MonName] = exporter.LastSeenMonitor{Timestamp: time.Now(), Resptime: respTime, StatusUp: statusUp}
 	monFromDB, err := db.GetMonitorByName(m.MonName)
 	if err == nil {
 		if monFromDB.LastStatus != db.MonLastStatusUp && statusUp {
@@ -80,5 +80,5 @@ func alert(statusUp bool, m db.Monitor, statusCode int, errorString string) {
 }
 
 func recordResponseTime(m db.Monitor, respTime int64) {
-	db.InsertRespTime(db.RespTime{MonId: m.Id, Timestamp: time.Now(), Time: respTime / 1000000})
+	db.InsertRespTime(db.RespTime{MonId: m.Id, Timestamp: time.Now(), Time: respTime})
 }
