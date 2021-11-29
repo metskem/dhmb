@@ -21,7 +21,7 @@ func Loop(m db.Monitor) {
 		statusCode := 0
 		errorString := ""
 		if err == nil && resp != nil && matchPattern.MatchString(resp.Status) {
-			log.Printf("%s: OK, statusCode: %d", m.MonName, resp.StatusCode)
+			log.Printf("%s: OK, statusCode: %d, respTime(ms): %d", m.MonName, resp.StatusCode, elapsed)
 			updateLastStatus(m, true, elapsed)
 			if retries >= m.Retries {
 				alert(true, m, statusCode, "")
