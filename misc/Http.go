@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/metskem/dhmb/db"
 	"github.com/metskem/dhmb/exporter"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"regexp"
@@ -17,6 +18,8 @@ func Loop(m db.Monitor) {
 		client := http.Client{Timeout: time.Duration(m.Timeout) * time.Second}
 		startTime := time.Now()
 		resp, err := client.Get(m.Url)
+		_, _ = ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
 		elapsed := time.Since(startTime).Milliseconds()
 		statusCode := 0
 		errorString := ""
@@ -26,7 +29,6 @@ func Loop(m db.Monitor) {
 			if retries >= m.Retries {
 				alert(true, m, statusCode, "")
 			}
-			defer resp.Body.Close()
 			retries = 0
 		} else {
 			if resp != nil {
