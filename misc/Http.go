@@ -15,12 +15,13 @@ func Loop(m db.Monitor) {
 	retries := 0
 	matchPattern := regexp.MustCompile(m.ExpRespCode)
 	for {
-		client := http.Client{Timeout: time.Duration(m.Timeout) * time.Second}
+		transport := http.Transport{MaxIdleConns: 0}
+		client := http.Client{Timeout: time.Duration(m.Timeout) * time.Second, Transport: &transport}
 		startTime := time.Now()
 		resp, err := client.Get(m.Url)
 		_, _ = ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
-		client.CloseIdleConnections()
+		//client.CloseIdleConnections()
 		elapsed := time.Since(startTime).Milliseconds()
 		statusCode := 0
 		errorString := ""
