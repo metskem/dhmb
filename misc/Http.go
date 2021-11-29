@@ -20,6 +20,7 @@ func Loop(m db.Monitor) {
 		resp, err := client.Get(m.Url)
 		_, _ = ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
+		client.CloseIdleConnections()
 		elapsed := time.Since(startTime).Milliseconds()
 		statusCode := 0
 		errorString := ""
