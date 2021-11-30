@@ -19,8 +19,10 @@ func Loop(m db.Monitor) {
 		client := http.Client{Timeout: time.Duration(m.Timeout) * time.Second, Transport: &transport}
 		startTime := time.Now()
 		resp, err := client.Get(m.Url)
-		_, _ = ioutil.ReadAll(resp.Body)
-		resp.Body.Close()
+		if resp != nil {
+			_, _ = ioutil.ReadAll(resp.Body)
+			resp.Body.Close()
+		}
 		elapsed := time.Since(startTime).Milliseconds()
 		statusCode := 0
 		errorString := ""
