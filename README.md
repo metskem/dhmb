@@ -1,6 +1,8 @@
 ### dhmb - Dirty Harry Monitor Bot
 
-Can monitor resources at specified intervals, and optionally send updates if a threshold is exceeded.
+Can monitor http resources at specified intervals, and optionally send Telegram updates if a threshold is exceeded.  
+Can partly be operated using Telegram.  
+Provides a prometheus exporter for response time metrics.
 
 ## Resources
 
@@ -28,24 +30,7 @@ unsilence - <monname> - unsilence a monitor (revert the silence)
 ## Configuration
 
 All configuration is done with environment variables. The following envvars are available:
-* **BOT_TOKEN** - the Telegram bot token, should be in the format <number>:<token>
+* **BOT_TOKEN** - the Telegram bot token, should be in the format `<number>:<token>`
 * **MAX_ROWS_RESPTIME** - The oldest rows in the resptime table are deleted each 10 minutes. This envvar defines how many rows remain per monitor. Default = 1000
 * **DEBUG** - true/false, whether the bot debug should be on or off. Default is false
 * **PROMETHEUS_EXPORTER_PORT** - The port to use for exposing the prometheus exporter (default is 9094). The metric `dhmb_resptime`, with labels `name` and `status` is exposed.
-
-## TODO
-
-* v - make the row cleanup configurable with an envvar
-* v - provide  response time graphs using https://github.com/go-echarts/go-echarts and
-       photoConfig := tgbotapi.NewDocumentUpload(chatter.ChatId, f.Name())
-     	_, err := Bot.Send(photoConfig)
-* v - refactor the reading of envvars to a separate conf package
-* v - provide background thread that cleans up the resptime table, use maxnumresptimes as an envvar
-* v - option to (un)silence a monitor
-* v - monitor definition (data model)
-* v - put chat in a (bolt?) db
-* v - if update comes in with [new_chat_members](https://stackoverflow.com/questions/52271498/can-i-detect-my-bots-groups-with-telegram-bot-api): put it on a persistent list
-* x - can we have the tg debug to a separate file?
-* v - dynamic turn debug on/off with a bot cmd
-* v - dynamic add/delete usernames with a bot cmd
-* v - show current usernames
