@@ -30,6 +30,8 @@ func Initdb() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// a simple but effective way to not get "database is locked" from sqlite3
 	Database.SetMaxOpenConns(1)
 
 	if !DbExists {
