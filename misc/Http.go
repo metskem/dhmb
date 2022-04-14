@@ -8,8 +8,11 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"sync"
 	"time"
 )
+
+var mutex sync.Mutex
 
 func Loop(m db.Monitor) {
 	retries := 0
@@ -55,6 +58,8 @@ func Loop(m db.Monitor) {
 }
 
 func updateLastStatus(m db.Monitor, statusUp bool, respTime int64) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	exporter.LastSeenMonitors[m.MonName] = exporter.LastSeenMonitor{Timestamp: time.Now(), Resptime: respTime, StatusUp: statusUp}
 	monFromDB, err := db.GetMonitorByName(m.MonName)
 	if err == nil {
