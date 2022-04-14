@@ -50,6 +50,8 @@ func main() {
 				for _, mon := range monitors {
 					db.CleanupOldStuffForMonitor(mon)
 				}
+			} else {
+				log.Printf("failed to get monitors: %s", err)
 			}
 		}
 	}()

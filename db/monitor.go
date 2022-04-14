@@ -34,39 +34,42 @@ func (m Monitor) String() string {
 
 /* GetMonitorsByStatus*/
 func GetMonitorsByStatus(status string) ([]Monitor, error) {
+	var result []Monitor
 	var err error
 	queryString := fmt.Sprintf("select * from monitor where monstatus=\"%s\" order by monname", status)
 	if status == MonStatusAll {
 		queryString = "select * from monitor order by monname"
 	}
 	rows, err := Database.Query(queryString, nil)
-	if err != nil {
-		log.Printf("failed to query table monitor, error: %s", err)
-	}
 	defer rows.Close()
-	var result []Monitor
-	for rows.Next() {
-		var id int
-		var monname, montype, monstatus, url, expRespCode, laststatus string
-		var intrvl, timeout, retries int
-		var laststatuschanged time.Time
-		err = rows.Scan(&id, &monname, &montype, &monstatus, &url, &intrvl, &expRespCode, &timeout, &retries, &laststatus, &laststatuschanged)
-		if err != nil {
-			log.Printf("error while scanning monitor table: %s", err)
+	if err != nil {
+		return nil, err
+	} else if rows == nil {
+		return nil, errors.New("rows object was nil from GetMonitorsByStatus")
+	} else {
+		for rows.Next() {
+			var id int
+			var monname, montype, monstatus, url, expRespCode, laststatus string
+			var intrvl, timeout, retries int
+			var laststatuschanged time.Time
+			err = rows.Scan(&id, &monname, &montype, &monstatus, &url, &intrvl, &expRespCode, &timeout, &retries, &laststatus, &laststatuschanged)
+			if err != nil {
+				log.Printf("error while scanning monitor table: %s", err)
+			}
+			result = append(result, Monitor{
+				Id:                id,
+				MonName:           monname,
+				MonType:           montype,
+				MonStatus:         monstatus,
+				Url:               url,
+				Interval:          intrvl,
+				ExpRespCode:       expRespCode,
+				Timeout:           timeout,
+				Retries:           retries,
+				LastStatus:        laststatus,
+				LastStatusChanged: laststatuschanged,
+			})
 		}
-		result = append(result, Monitor{
-			Id:                id,
-			MonName:           monname,
-			MonType:           montype,
-			MonStatus:         monstatus,
-			Url:               url,
-			Interval:          intrvl,
-			ExpRespCode:       expRespCode,
-			Timeout:           timeout,
-			Retries:           retries,
-			LastStatus:        laststatus,
-			LastStatusChanged: laststatuschanged,
-		})
 	}
 	return result, err
 }
