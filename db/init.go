@@ -30,6 +30,7 @@ func Initdb() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	Database.SetMaxOpenConns(1)
 
 	if !DbExists {
 		sqlStmts, err := ioutil.ReadFile(conf.CreateTablesFile)
