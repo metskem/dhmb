@@ -41,12 +41,12 @@ func GetMonitorsByStatus(status string) ([]Monitor, error) {
 		queryString = "select * from monitor order by monname"
 	}
 	rows, err := Database.Query(queryString, nil)
-	defer rows.Close()
 	if err != nil {
 		return nil, err
 	} else if rows == nil {
 		return nil, errors.New("rows object was nil from GetMonitorsByStatus")
 	} else {
+		defer rows.Close()
 		for rows.Next() {
 			var id int
 			var monname, montype, monstatus, url, expRespCode, laststatus string
