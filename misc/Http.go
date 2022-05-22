@@ -19,7 +19,7 @@ func Loop(m db.Monitor) {
 	matchPattern := regexp.MustCompile(m.ExpRespCode)
 	for {
 		transport := http.Transport{IdleConnTimeout: time.Second}
-		client := http.Client{Timeout: time.Duration(m.Timeout) * time.Second, Transport: &transport}
+		client := http.Client{CheckRedirect: func(req *http.Request, via []*http.Request) error { return http.ErrUseLastResponse }, Timeout: time.Duration(m.Timeout) * time.Second, Transport: &transport}
 		startTime := time.Now()
 		resp, err := client.Get(m.Url)
 		if resp != nil {
