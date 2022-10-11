@@ -37,9 +37,9 @@ func (m Monitor) String() string {
 func GetMonitorsByStatus(status string) ([]Monitor, error) {
 	var result []Monitor
 	var err error
-	queryString := fmt.Sprintf("select * from monitor where monstatus=\"%s\" order by monname", status)
+	queryString := fmt.Sprintf("select id,monname,montype,monstatus,url,intrvl,exp_resp_code,exp_response,timeout,retries,laststatus,laststatuschanged from monitor where monstatus=\"%s\" order by monname", status)
 	if status == MonStatusAll {
-		queryString = "select * from monitor order by monname"
+		queryString = "select id,monname,montype,monstatus,url,intrvl,exp_resp_code,exp_response,timeout,retries,laststatus,laststatuschanged from monitor order by monname"
 	}
 	rows, err := Database.Query(queryString, nil)
 	if err != nil {
@@ -79,7 +79,7 @@ func GetMonitorsByStatus(status string) ([]Monitor, error) {
 func GetMonitorByName(name string) (Monitor, error) {
 	var err error
 	var mon Monitor
-	selectSQL := "select * from monitor where monname=?"
+	selectSQL := "select id,monname,montype,monstatus,url,intrvl,exp_resp_code,exp_response,timeout,retries,laststatus,laststatuschanged from monitor where monname=?"
 	statement, err := Database.Prepare(selectSQL)
 	if err != nil {
 		msg := fmt.Sprintf("failed to prepare stmt for select monitor with name %s, error: %s", name, err)
@@ -116,7 +116,7 @@ func GetMonitorByName(name string) (Monitor, error) {
 func GetMonitorById(Id int) (Monitor, error) {
 	var err error
 	var mon Monitor
-	selectSQL := "select * from monitor where id=?"
+	selectSQL := "select id,monname,montype,monstatus,url,intrvl,exp_resp_code,exp_response,timeout,retries,laststatus,laststatuschanged from monitor where id=?"
 	statement, err := Database.Prepare(selectSQL)
 	if err != nil {
 		return mon, errors.New(fmt.Sprintf("failed to prepare stmt for select monitor with id %d, error: %s", Id, err))
