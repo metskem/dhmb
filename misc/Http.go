@@ -36,7 +36,7 @@ func Loop(m db.Monitor) {
 				}
 				retries = 0
 			} else {
-				log.Printf("%s: NOK, pattern \"%s\" not found in response body, statusCode: %d, respTime(ms): %d", m.ExpResponse, m.MonName, resp.StatusCode, elapsed)
+				log.Printf("%s: NOK, pattern \"%s\" not found in response body, statusCode: %d, respTime(ms): %d", m.MonName, m.ExpResponse, resp.StatusCode, elapsed)
 				updateLastStatus(m, false, elapsed)
 				retries++
 				if retries == m.Retries {

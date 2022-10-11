@@ -157,7 +157,7 @@ func UpdateMonitor(mon Monitor) error {
 		return errors.New(msg)
 	} else {
 		defer statement.Close()
-		result, err := statement.Exec(mon.MonName, mon.MonType, mon.MonStatus, mon.Url, mon.Interval, mon.ExpRespCode, mon.ExpResponse, mon.ExpResponse, mon.Timeout, mon.Retries, mon.LastStatus, mon.LastStatusChanged, mon.MonName)
+		result, err := statement.Exec(mon.MonName, mon.MonType, mon.MonStatus, mon.Url, mon.Interval, mon.ExpRespCode, mon.ExpResponse, mon.Timeout, mon.Retries, mon.LastStatus, mon.LastStatusChanged, mon.MonName)
 		if err != nil {
 			log.Printf("failed to update monitor with name %s, error: %s", mon.MonName, err)
 			return err
