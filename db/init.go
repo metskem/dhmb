@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/metskem/dhmb/conf"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -35,7 +34,7 @@ func Initdb() {
 	Database.SetMaxOpenConns(1)
 
 	if !DbExists {
-		sqlStmts, err := ioutil.ReadFile(conf.CreateTablesFile)
+		sqlStmts, err := os.ReadFile(conf.CreateTablesFile)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -44,7 +43,7 @@ func Initdb() {
 			log.Fatalf("%q: %s\n", err, sqlStmts)
 		}
 
-		sqlStmts, err = ioutil.ReadFile(conf.InsertTestDataFile)
+		sqlStmts, err = os.ReadFile(conf.InsertTestDataFile)
 		if err != nil {
 			log.Fatal(err)
 		}

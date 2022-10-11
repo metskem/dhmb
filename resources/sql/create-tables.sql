@@ -9,6 +9,7 @@ create table monitor
     url               char(1024)       not null,
     intrvl            int              not null                                                           default 30,
     exp_resp_code     char(3)          not null                                                           default '200',
+    exp_response      char(256)        not null                                                           default '.*',
     timeout           int              not null                                                           default 5,
     retries           int              not null                                                           default 2,
     laststatus        char(32)         not null CHECK ( laststatus IN ('down', 'up', 'unknown') )         default 'unknown',

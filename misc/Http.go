@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/metskem/dhmb/db"
 	"github.com/metskem/dhmb/exporter"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"regexp"
@@ -16,26 +16,34 @@ var mutex sync.Mutex
 
 func Loop(m db.Monitor) {
 	retries := 0
-	matchPattern := regexp.MustCompile(m.ExpRespCode)
+	matchPatternResponse := regexp.MustCompile(m.ExpResponse)
+	matchPatternRespCode := regexp.MustCompile(m.ExpRespCode)
 	for {
 		transport := http.Transport{IdleConnTimeout: time.Second}
 		client := http.Client{CheckRedirect: func(req *http.Request, via []*http.Request) error { return http.ErrUseLastResponse }, Timeout: time.Duration(m.Timeout) * time.Second, Transport: &transport}
 		startTime := time.Now()
 		resp, err := client.Get(m.Url)
-		if resp != nil {
-			_, _ = ioutil.ReadAll(resp.Body)
-			resp.Body.Close()
-		}
 		elapsed := time.Since(startTime).Milliseconds()
 		statusCode := 0
 		errorString := ""
-		if err == nil && resp != nil && matchPattern.MatchString(resp.Status) {
-			log.Printf("%s: OK, statusCode: %d, respTime(ms): %d", m.MonName, resp.StatusCode, elapsed)
-			updateLastStatus(m, true, elapsed)
-			if retries >= m.Retries {
-				alert(true, m, statusCode, "")
+		if err == nil && resp != nil && matchPatternRespCode.MatchString(resp.Status) {
+			respBody, _ := io.ReadAll(resp.Body)
+			if matchPatternResponse.MatchString(string(respBody)) {
+				log.Printf("%s: OK, statusCode: %d, respTime(ms): %d", m.MonName, resp.StatusCode, elapsed)
+				updateLastStatus(m, true, elapsed)
+				if retries >= m.Retries {
+					alert(true, m, statusCode, "")
+				}
+				retries = 0
+			} else {
+				log.Printf("%s: NOK, pattern \"%s\" not found in response body, statusCode: %d, respTime(ms): %d", m.ExpResponse, m.MonName, resp.StatusCode, elapsed)
+				updateLastStatus(m, false, elapsed)
+				retries++
+				if retries == m.Retries {
+					alert(false, m, statusCode, errorString)
+				}
 			}
-			retries = 0
+			_ = resp.Body.Close()
 		} else {
 			if resp != nil {
 				statusCode = resp.StatusCode

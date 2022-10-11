@@ -15,6 +15,7 @@ type Monitor struct {
 	Url               string
 	Interval          int
 	ExpRespCode       string
+	ExpResponse       string
 	Timeout           int
 	Retries           int
 	LastStatus        string
@@ -32,7 +33,7 @@ func (m Monitor) String() string {
 	return fmt.Sprintf("monname:%s type:%s", m.MonName, m.MonType)
 }
 
-/* GetMonitorsByStatus*/
+// GetMonitorsByStatus */
 func GetMonitorsByStatus(status string) ([]Monitor, error) {
 	var result []Monitor
 	var err error
@@ -49,10 +50,10 @@ func GetMonitorsByStatus(status string) ([]Monitor, error) {
 		defer rows.Close()
 		for rows.Next() {
 			var id int
-			var monname, montype, monstatus, url, expRespCode, laststatus string
+			var monname, montype, monstatus, url, expRespCode, expResponse, laststatus string
 			var intrvl, timeout, retries int
 			var laststatuschanged time.Time
-			err = rows.Scan(&id, &monname, &montype, &monstatus, &url, &intrvl, &expRespCode, &timeout, &retries, &laststatus, &laststatuschanged)
+			err = rows.Scan(&id, &monname, &montype, &monstatus, &url, &intrvl, &expRespCode, &expResponse, &timeout, &retries, &laststatus, &laststatuschanged)
 			if err != nil {
 				log.Printf("error while scanning monitor table: %s", err)
 			}
@@ -64,6 +65,7 @@ func GetMonitorsByStatus(status string) ([]Monitor, error) {
 				Url:               url,
 				Interval:          intrvl,
 				ExpRespCode:       expRespCode,
+				ExpResponse:       expResponse,
 				Timeout:           timeout,
 				Retries:           retries,
 				LastStatus:        laststatus,
@@ -86,10 +88,10 @@ func GetMonitorByName(name string) (Monitor, error) {
 	} else {
 		defer statement.Close()
 		var id int
-		var monname, montype, monstatus, url, expRespCode, laststatus string
+		var monname, montype, monstatus, url, expRespCode, expResponse, laststatus string
 		var intrvl, timeout, retries int
 		var laststatuschanged time.Time
-		err = statement.QueryRow(name).Scan(&id, &monname, &montype, &monstatus, &url, &intrvl, &expRespCode, &timeout, &retries, &laststatus, &laststatuschanged)
+		err = statement.QueryRow(name).Scan(&id, &monname, &montype, &monstatus, &url, &intrvl, &expRespCode, &expResponse, &timeout, &retries, &laststatus, &laststatuschanged)
 		if err != nil {
 			log.Printf("failed to get monitor with name %s, error: %s", monname, err)
 			return Monitor{}, err
@@ -102,6 +104,7 @@ func GetMonitorByName(name string) (Monitor, error) {
 			Url:               url,
 			Interval:          intrvl,
 			ExpRespCode:       expRespCode,
+			ExpResponse:       expResponse,
 			Timeout:           timeout,
 			Retries:           retries,
 			LastStatus:        laststatus,
@@ -120,10 +123,10 @@ func GetMonitorById(Id int) (Monitor, error) {
 	} else {
 		defer statement.Close()
 		var id int
-		var monname, montype, monstatus, url, expRespCode, laststatus string
+		var monname, montype, monstatus, url, expRespCode, expResponse, laststatus string
 		var intrvl, timeout, retries int
 		var laststatuschanged time.Time
-		err = statement.QueryRow(Id).Scan(&id, &monname, &montype, &monstatus, &url, &intrvl, &expRespCode, &timeout, &retries, &laststatus, &laststatuschanged)
+		err = statement.QueryRow(Id).Scan(&id, &monname, &montype, &monstatus, &url, &intrvl, &expRespCode, &expResponse, &timeout, &retries, &laststatus, &laststatuschanged)
 		if err != nil {
 			log.Printf("failed to get monitor with id %d, error: %s", Id, err)
 			return Monitor{}, err
@@ -136,6 +139,7 @@ func GetMonitorById(Id int) (Monitor, error) {
 			Url:               url,
 			Interval:          intrvl,
 			ExpRespCode:       expRespCode,
+			ExpResponse:       expResponse,
 			Timeout:           timeout,
 			Retries:           retries,
 			LastStatus:        laststatus,
@@ -145,7 +149,7 @@ func GetMonitorById(Id int) (Monitor, error) {
 }
 func UpdateMonitor(mon Monitor) error {
 	var err error
-	updateSQL := "update monitor set monname=?,montype=?,monstatus=?,url=?,intrvl=?,exp_resp_code=?,timeout=?,retries=?,laststatus=?,laststatuschanged=? where monname=?"
+	updateSQL := "update monitor set monname=?,montype=?,monstatus=?,url=?,intrvl=?,exp_resp_code=?,exp_response=?,timeout=?,retries=?,laststatus=?,laststatuschanged=? where monname=?"
 	statement, err := Database.Prepare(updateSQL)
 	if err != nil {
 		msg := fmt.Sprintf("failed to prepare stmt for update monitor with name %s, error: %s", mon.MonName, err)
@@ -153,7 +157,7 @@ func UpdateMonitor(mon Monitor) error {
 		return errors.New(msg)
 	} else {
 		defer statement.Close()
-		result, err := statement.Exec(mon.MonName, mon.MonType, mon.MonStatus, mon.Url, mon.Interval, mon.ExpRespCode, mon.Timeout, mon.Retries, mon.LastStatus, mon.LastStatusChanged, mon.MonName)
+		result, err := statement.Exec(mon.MonName, mon.MonType, mon.MonStatus, mon.Url, mon.Interval, mon.ExpRespCode, mon.ExpResponse, mon.ExpResponse, mon.Timeout, mon.Retries, mon.LastStatus, mon.LastStatusChanged, mon.MonName)
 		if err != nil {
 			log.Printf("failed to update monitor with name %s, error: %s", mon.MonName, err)
 			return err

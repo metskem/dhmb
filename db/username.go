@@ -41,9 +41,7 @@ func GetUserNames() []UserName {
 	return result
 }
 
-/**
-  Insert a row into the username table. Returns the lastInsertId of the insert operation.
-*/
+// InsertUserName - Insert a row into the username table. Returns the lastInsertId of the insert operation. */
 func InsertUserName(userName UserName) int64 {
 	insertSQL := "insert into username(name,role) values(?,?)"
 	statement, err := Database.Prepare(insertSQL)

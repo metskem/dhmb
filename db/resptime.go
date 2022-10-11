@@ -28,8 +28,8 @@ func GetLatestRespTimesByMonname(monname string) []RespTime {
 		for rows.Next() {
 			var id, monId int
 			var timestamp time.Time
-			var time int64
-			err = rows.Scan(&id, &timestamp, &monId, &time)
+			var respTime int64
+			err = rows.Scan(&id, &timestamp, &monId, &respTime)
 			if err != nil {
 				log.Printf("error while scanning resptime table: %s", err)
 			}
@@ -37,14 +37,14 @@ func GetLatestRespTimesByMonname(monname string) []RespTime {
 				Id:        id,
 				Timestamp: timestamp,
 				MonId:     monId,
-				Time:      time,
+				Time:      respTime,
 			})
 		}
 	}
 	return result
 }
 
-// return the last resptime update for each monitor, a map of timestamps is returned, key-ed by monid
+// GetNewestTimestamps - return the last resptime update for each monitor, a map of timestamps is returned, key-ed by monid
 func GetNewestTimestamps() map[int]time.Time {
 	var dateFormat = "2006-01-02 15:04:05Z07:00"
 	var result = make(map[int]time.Time)
@@ -70,9 +70,7 @@ func GetNewestTimestamps() map[int]time.Time {
 	return result
 }
 
-/**
-  Insert a row into the resptime table using the given resptime. Returns the lastInsertId of the insert operation.
-*/
+// InsertRespTime - Insert a row into the resptime table using the given resptime. Returns the lastInsertId of the insert operation. */
 func InsertRespTime(respTime RespTime) int64 {
 	insertSQL := "insert into resptime(timestamp, monid, time) values(?,?,?)"
 	statement, err := Database.Prepare(insertSQL)

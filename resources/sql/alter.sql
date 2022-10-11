@@ -15,3 +15,5 @@ alter table monitor rename to monitor;
 -- add a column
 alter table resptime
     add column timestamp timestamp default current_timestamp; -- does not work: Error: Cannot add a column with non-constant default
+
+alter table monitor add column exp_response char(256) not null default '.*'; -- does not work: Error: Cannot add a column with non-constant default

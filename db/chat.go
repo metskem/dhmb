@@ -39,9 +39,7 @@ func GetChats() []Chat {
 	return result
 }
 
-/**
-  Insert a row into the chat table using the given chat. Returns the lastInsertId of the insert operation.
-*/
+// InsertChat - Insert a row into the chat table using the given chat. Returns the lastInsertId of the insert operation. */
 func InsertChat(chat Chat) int64 {
 	insertSQL := "insert into chat(chatid, name) values(?,?)"
 	statement, err := Database.Prepare(insertSQL)
