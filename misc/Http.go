@@ -68,7 +68,7 @@ func Loop(m db.Monitor) {
 func updateLastStatus(m db.Monitor, statusUp bool, respTime int64) {
 	mutex.Lock()
 	defer mutex.Unlock()
-	exporter.LastSeenMonitors[m.MonName] = exporter.LastSeenMonitor{Timestamp: time.Now(), Resptime: respTime, StatusUp: statusUp}
+	exporter.LastSeenMonitors[m.MonName] = exporter.LastSeenMonitor{Timestamp: time.Now(), RespTime: respTime, StatusUp: statusUp}
 	monFromDB, err := db.GetMonitorByName(m.MonName)
 	if err == nil {
 		if monFromDB.LastStatus != db.MonLastStatusUp && statusUp {
