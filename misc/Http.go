@@ -25,6 +25,7 @@ func Loop(m db.Monitor) {
 		req := setRandomUseragent()
 		req.URL, _ = req.URL.Parse(m.Url)
 		req.Host = req.URL.Host
+		req.Header.Set("accept", "*/*")
 		startTime := time.Now()
 		resp, err := client.Do(req)
 		elapsed := time.Since(startTime).Milliseconds()
@@ -77,6 +78,7 @@ func setRandomUseragent() (req *http.Request) {
 	}
 	rev := rand.Intn(10) + 100
 	req.Header.Set("User-Agent", fmt.Sprintf("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:%d.0) Gecko/20100101 Firefox/%d.0", rev, rev))
+	req.Header.Set("User-Agent", "curl/7.81.0")
 	return req
 }
 
