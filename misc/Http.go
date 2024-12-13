@@ -75,7 +75,7 @@ func setRandomUseragent() (req *http.Request) {
 		log.Printf("Error creating request: %s", err)
 		return
 	}
-	req.Header.Set("User-Agent", fmt.Sprintf("dhmb-client/1.%d", rand.Intn(100)))
+	req.Header.Set("User-Agent", fmt.Sprintf("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:%d.0", rand.Intn(100)))
 	return req
 }
 
