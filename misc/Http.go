@@ -24,7 +24,7 @@ func Loop(m db.Monitor) {
 		client := http.Client{CheckRedirect: func(req *http.Request, via []*http.Request) error { return http.ErrUseLastResponse }, Timeout: time.Duration(m.Timeout) * time.Second, Transport: &transport}
 		req := setRandomUseragent()
 		req.URL, _ = req.URL.Parse(m.Url)
-		req.Header.Set("Host", req.URL.Host)
+		req.Host = req.URL.Host
 		startTime := time.Now()
 		resp, err := client.Do(req)
 		elapsed := time.Since(startTime).Milliseconds()
