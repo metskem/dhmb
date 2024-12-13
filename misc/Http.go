@@ -6,6 +6,7 @@ import (
 	"github.com/metskem/dhmb/exporter"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"regexp"
 	"sync"
@@ -19,10 +20,12 @@ func Loop(m db.Monitor) {
 	matchPatternResponse := regexp.MustCompile(m.ExpResponse)
 	matchPatternRespCode := regexp.MustCompile(m.ExpRespCode)
 	for {
-		transport := http.Transport{IdleConnTimeout: time.Second}
+		transport := http.Transport{IdleConnTimeout: time.Second, DisableKeepAlives: true}
 		client := http.Client{CheckRedirect: func(req *http.Request, via []*http.Request) error { return http.ErrUseLastResponse }, Timeout: time.Duration(m.Timeout) * time.Second, Transport: &transport}
+		req := setRandomUseragent()
+		req.URL, _ = req.URL.Parse(m.Url)
 		startTime := time.Now()
-		resp, err := client.Get(m.Url)
+		resp, err := client.Do(req)
 		elapsed := time.Since(startTime).Milliseconds()
 		statusCode := 0
 		errorString := ""
@@ -63,6 +66,16 @@ func Loop(m db.Monitor) {
 			return
 		}
 	}
+}
+
+func setRandomUseragent() (req *http.Request) {
+	req, err := http.NewRequest("GET", "https://example.com", nil)
+	if err != nil {
+		log.Printf("Error creating request: %s", err)
+		return
+	}
+	req.Header.Set("User-Agent", fmt.Sprintf("dhmb-client/1.%d", rand.Intn(100)))
+	return req
 }
 
 func updateLastStatus(m db.Monitor, statusUp bool, respTime int64) {
