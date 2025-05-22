@@ -2,13 +2,14 @@ package misc
 
 import (
 	"fmt"
+	"github.com/metskem/dhmb/conf"
 	"github.com/metskem/dhmb/db"
 	"github.com/metskem/dhmb/exporter"
 	"io"
 	"log"
-	"math/rand"
 	"net/http"
 	"regexp"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -76,9 +77,7 @@ func setRandomUseragent() (req *http.Request) {
 		log.Printf("Error creating request: %s", err)
 		return
 	}
-	rev := rand.Intn(10) + 100
-	req.Header.Set("User-Agent", fmt.Sprintf("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:%d.0) Gecko/20100101 Firefox/%d.0", rev, rev))
-	req.Header.Set("User-Agent", "curl/7.81.0")
+	req.Header.Set("User-Agent", fmt.Sprintf("dhmb/%s (%s %s)", conf.VersionTag, runtime.GOOS, runtime.Version()))
 	return req
 }
 
