@@ -37,5 +37,6 @@ darwin:
 	GOOS=darwin GOARCH=amd64 go build -o ./target/darwin_amd64/${BINARY} ${LDFLAGS} .
 
 arm64:
-	GOOS=linux GOARCH=arm GOARM=7 go build -o ./target/linux_arm64/${BINARY} ${LDFLAGS} .
 #   could not get this working on my Mac. So no cross-compile, for now I just compile it on my Raspberry PI
+    CGO_ENABLED=1 go build -o ./target/linux_arm64/${BINARY} ${LDFLAGS} .
+#	GOOS=linux GOARCH=arm GOARM=7 go build -o ./target/linux_arm64/${BINARY} ${LDFLAGS} .
