@@ -1,6 +1,8 @@
 BINARY=dhmb
 # VERSION_TAG=`git describe 2>/dev/null | cut -f 1 -d '-' 2>/dev/null`
-$(eval VERSION_TAG = $(shell git describe 2>/dev/null | cut -f 1 -d '-' 2>/dev/null))
+# $(eval VERSION_TAG = $(shell git describe 2>/dev/null | cut -f 1 -d '-' 2>/dev/null))
+$(eval VERSION_TAG = $(shell git tag))
+
 
 # If no git tag is set, fallback to 'DEVELOPMENT'
 ifeq ($(strip ${VERSION_TAG}),)
@@ -38,5 +40,5 @@ darwin:
 
 arm64:
 #   could not get this working on my Mac. So no cross-compile, for now I just compile it on my Raspberry PI
-    CGO_ENABLED=1 go build -o ./target/linux_arm64/${BINARY} ${LDFLAGS} .
+	CGO_ENABLED=1 go build -o ./target/linux_arm64/${BINARY} ${LDFLAGS} .
 #	GOOS=linux GOARCH=arm GOARM=7 go build -o ./target/linux_arm64/${BINARY} ${LDFLAGS} .
