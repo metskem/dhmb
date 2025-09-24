@@ -13,7 +13,7 @@ type LastSeenMonitor struct {
 }
 
 var LastSeenMonitors = make(map[string]LastSeenMonitor)
-var lastSeenMonitorsMutex = sync.Mutex{}
+var LastSeenMonitorsMutex = sync.Mutex{}
 
 type DhmbCollector struct {
 	resptimeMetric *prometheus.Desc
@@ -30,8 +30,8 @@ func (collector *DhmbCollector) Describe(ch chan<- *prometheus.Desc) {
 
 func (collector *DhmbCollector) Collect(ch chan<- prometheus.Metric) {
 	var status string
-	lastSeenMonitorsMutex.Lock()
-	defer lastSeenMonitorsMutex.Unlock()
+	LastSeenMonitorsMutex.Lock()
+	defer LastSeenMonitorsMutex.Unlock()
 	for name, lastSeenMon := range LastSeenMonitors {
 		if lastSeenMon.Timestamp.After(time.Now().Add(-5 * time.Minute)) {
 			status = "DOWN"

@@ -10,11 +10,8 @@ import (
 	"net/http"
 	"regexp"
 	"runtime"
-	"sync"
 	"time"
 )
-
-var mutex sync.Mutex
 
 func Loop(m db.Monitor) {
 	retries := 0
@@ -82,8 +79,8 @@ func setRandomUseragent() (req *http.Request) {
 }
 
 func updateLastStatus(m db.Monitor, statusUp bool, respTime int64) {
-	mutex.Lock()
-	defer mutex.Unlock()
+	exporter.LastSeenMonitorsMutex.Lock()
+	defer exporter.LastSeenMonitorsMutex.Unlock()
 	exporter.LastSeenMonitors[m.MonName] = exporter.LastSeenMonitor{Timestamp: time.Now(), RespTime: respTime, StatusUp: statusUp}
 	monFromDB, err := db.GetMonitorByName(m.MonName)
 	if err == nil {
