@@ -48,9 +48,9 @@ func GetLatestRespTimesByMonname(monname string) []RespTime {
 func GetNewestTimestamps() map[int]time.Time {
 	var dateFormat = "2006-01-02 15:04:05Z07:00"
 	var result = make(map[int]time.Time)
-	rows, err := Database.Query(fmt.Sprintf(`select monid,max(timestamp) from resptime where monstatus!="%s" group by monid order by monid`, MonStatusInactive))
+	rows, err := Database.Query(fmt.Sprintf(`select monid,max(timestamp),monstatus from resptime where monstatus!="%s" group by monid order by monid`, MonStatusInactive))
 	if err != nil {
-		log.Printf("failed to newest timestamps from resptime, error: %s", err)
+		log.Printf("failed to get newest timestamps from resptime, error: %s", err)
 	} else {
 		defer rows.Close()
 		for rows.Next() {
