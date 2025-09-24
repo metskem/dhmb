@@ -64,7 +64,11 @@ func HandleCommand(update tgbotapi.Update) {
 			msg = fmt.Sprintf("failed to get active monitors, error: %s", err)
 		} else {
 			for ix, mon := range monitors {
-				msg = fmt.Sprintf("%s%d - %s: %s since %s\n", msg, ix, mon.MonName, mon.LastStatus, mon.LastStatusChanged.Format(time.RFC3339))
+				monStatus := ""
+				if mon.MonStatus == db.MonStatusInactive {
+					monStatus = "(inactive)"
+				}
+				msg = fmt.Sprintf("%s%d - %s: %s since %s %s\n", msg, ix, mon.MonName, mon.LastStatus, mon.LastStatusChanged.Format(time.RFC3339), monStatus)
 			}
 		}
 		log.Println("\n" + msg)
