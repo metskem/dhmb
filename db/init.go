@@ -19,7 +19,7 @@ func Initdb() {
 		log.Fatalf("failed parsing database url %s, error: %s", conf.DatabaseURL, err.Error())
 	}
 	if _, err = os.Stat(dbURL.Opaque); err != nil && dbURL.Scheme == "file" {
-		log.Printf("database %s does not exist, creating it...\n")
+		log.Printf("database %s does not exist, creating it...\n", conf.DatabaseURL)
 		DbExists = false
 	} else {
 		DbExists = true
